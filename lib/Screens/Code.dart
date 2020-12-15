@@ -77,6 +77,7 @@ class CodeState extends State<Code>{
             margin: const EdgeInsets.all(30.0),
             //padding: const EdgeInsets.all(20.0),
             child: PinPut(
+
               fieldsCount: 4,
               eachFieldHeight: size.height*0.08,
               eachFieldWidth: size.width*0.15,
@@ -84,6 +85,7 @@ class CodeState extends State<Code>{
               onSubmit: (String pin) {
                 setState(() {
                   value = pin;
+                  print(value);
                 });
               },
               focusNode: _pinPutFocusNode,
