@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:amr/Global.dart';
+import 'package:amr/Screens/EditOrder2.dart';
 import 'package:amr/Screens/NewOrder2.dart';
 import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
@@ -12,15 +13,20 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NewOrder extends StatefulWidget{
+class EditOrder extends StatefulWidget{
+  EditOrder({this.id,this.CatId,this.SubCatId,this.CityId,this.DisId,this.Images,this.price,this.title,this.descrtiption,this.CityName,this.DisName,this.SubCatName});
+  final int id,CatId,SubCatId,CityId,DisId;
+  final List Images;
+  final String price,title,descrtiption,CityName,DisName,SubCatName;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return NewOrderState();
+    return EditOrderState();
   }
 
 }
-class NewOrderState extends State<NewOrder>{
+class EditOrderState extends State<EditOrder>{
+
   int CatID ;
   int SubCatId;
   String _value1;
@@ -39,6 +45,11 @@ class NewOrderState extends State<NewOrder>{
     super.initState();
     getCat();
     getSubCat();
+    _controller.text = widget.title;
+    _controller2.text = widget.descrtiption;
+    CatID = widget.CatId;
+    SubCatId = widget.SubCatId;
+
   }
   @override
   Widget build(BuildContext context) {
@@ -224,9 +235,9 @@ class NewOrderState extends State<NewOrder>{
                 ),
               ),
               child: Column(children: [
-                Row(children: [
-                  Text('الفئة الفرعية',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
-                ],),
+                // Row(children: [
+                //   Text('الفئة الفرعية',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                // ],),
                 DropdownButtonHideUnderline(child:DropdownButton<String>(
                   value: _value4,
                   isExpanded: true,
@@ -259,7 +270,7 @@ class NewOrderState extends State<NewOrder>{
                           // _isChose = true;
                         });
                   },
-                  hint: Text("الفئة الفرعية",textAlign: TextAlign.center,style: TextStyle(
+                  hint: Text("${widget.SubCatName}",textAlign: TextAlign.center,style: TextStyle(
                       color: Colors.black,fontFamily: 'jana'),),
 
                 ),
@@ -427,10 +438,10 @@ class NewOrderState extends State<NewOrder>{
               }else if(ImageFiles.isEmpty){
                 onBackPress(context,"أضف صور");
               }else{
-                Navigator.pushReplacement(
+                Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewOrder2(title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: ImageFiles,),
+                      builder: (context) => EditOrder2(id:widget.id,title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: ImageFiles,CityName: widget.CityName,DisName: widget.DisName,price: widget.price,CityId: widget.CityId,DicId: widget.DisId,),
                     ));
                 //Navigator.pushNamed(context, "NewOrder2");
               }

@@ -1,7 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:amr/Screens/Home.dart';
+import 'package:amr/user/Home_user.dart';
+import 'package:amr/user/Registration_user.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class Splash extends StatefulWidget {
@@ -54,7 +58,37 @@ class SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
   void splash() async {
     await new Future.delayed(const Duration(seconds: 5));
-    Navigator.pushReplacementNamed(context, "NextPage3_user");
+    SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    sharedPrefs.setString('intro', '1');
+    if(sharedPrefs.getString('intro') != null){
+      if(sharedPrefs.getString('UserType') == "مشتري"){
+        print(sharedPrefs.getString('UserType'));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Home_user(),
+            ));
+      }else  if(sharedPrefs.getString('UserType') == "بائع"){
+        print(sharedPrefs.getString('UserType'));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeAS(),
+            ));
+      }else{
+        print(sharedPrefs.getString('UserType'));
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Registration_user(),
+            ));
+      }
+
+
+  }else{
+      Navigator.pushReplacementNamed(context, "NextPage3_user");
+    }
+
       }
 
 

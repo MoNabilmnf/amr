@@ -1,5 +1,11 @@
+
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:amr/APIs/Api.dart';
+import 'package:amr/Global.dart';
+import 'package:amr/Screens/order_ditails.dart';
+import 'package:http/http.dart' as http;
 import 'package:amr/user/discover_user.dart';
 import 'package:amr/user/messages_user.dart';
 import 'package:amr/user/settings_user.dart';
@@ -9,6 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_stack/image_stack.dart';
 import 'package:amr/BNBCustompain.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'UserOrder.dart';
 
 class Home_user extends StatefulWidget{
   @override
@@ -31,6 +40,22 @@ class Home_userState extends State<Home_user>{
   Color color6 = colorFromHex("##e6faf2");
   Color color7 = colorFromHex("#242a38");
   List col33 = [0,1,0,0,0];
+  bool Ha = false;
+  List<String> Cats = new List();
+  List<String> City = new List();
+  List<String> SubCat = new List();
+  ScrollController _scrollController = ScrollController();
+  int CatID ;
+  List Imagess = [];
+  List S = [];
+  List C ;
+  List SC = [];
+  List Dis = [];
+  int CityId ,DicId;
+  String CityName = 'المدينة';
+  String DicName = 'الحي';
+  int SubCatId;
+  String _value1,_value2;
   List name44 = ['شقق','أراضي','فلل'];
   List name_radio = ['النقل','القيروان','العارض','الصحافة','المروج','المصيف','النخيل'];
   List name_radio22 = ['الرياض','القيروان','العارض','جده','مكه'];
@@ -236,7 +261,6 @@ class Home_userState extends State<Home_user>{
         });
   }
 
-
   void onButtonPressedfloat(context) {
     showModalBottomSheet(
 
@@ -250,69 +274,22 @@ class Home_userState extends State<Home_user>{
         builder: (builder) {
           return FractionallySizedBox(
             heightFactor: 0.90,
-            child: BigListViewWidgetfloat(),
+            child: UserOrder(),
+            //BigListViewWidgetfloat(),
           );
         });
   }
 
 
   Widget BigListViewWidgetfloat() {
-    Widget BigListViewWidgetEE() {
-      String groub;
-      List groups=['asdsd','القيروان','asa','الصحافة','المروج',];
 
-      return StatefulBuilder(// You need this, notice the parameters below:
-          builder: (BuildContext context, StateSetter setState) {
-            final Size size = MediaQuery.of(context).size;
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child:Container(padding: EdgeInsets.only(left: 20,right: 20,top: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Row(children: [
-                        Text('المدينة',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
-                      ],),
-                      new Expanded(
-                        child:ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: name_radio.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Container(
-                                child: Row(
-                                  children: <Widget>[
-                                    Text("    "),
-                                    Text(name_radio[index],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
-                                    Spacer(),
-
-                                    Radio(
-                                        activeColor: color1,
-                                        value: 1,
-                                        groupValue: groupss[index],
-                                        onChanged: (T) {
-                                          print(T);
-                                          setState(() {
-                                            groupss.insert(index, T);
-                                            //groub = T;
-                                          });
-                                        }),
-                                    Text("  ")
-                                  ],
-                                ));
-                          },
-                        ),),
-                    ],
-                  )),);
-
-          });
-    }
     Widget BigListViewWidgetEEE() {
       String groub;
       List groups=['asdsd','القيروان','asa','الصحافة','المروج',];
 
       return StatefulBuilder(// You need this, notice the parameters below:
           builder: (BuildContext context, StateSetter setState) {
+            bool c =false;
             final Size size = MediaQuery.of(context).size;
             return Directionality(
               textDirection: TextDirection.rtl,
@@ -327,25 +304,40 @@ class Home_userState extends State<Home_user>{
                       new Expanded(
                         child:ListView.builder(
                           shrinkWrap: true,
-                          itemCount: name_radio22.length,
+                          itemCount: City.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Container(
                                 child: Row(
                                   children: <Widget>[
                                     Text("    "),
-                                    Text(name_radio22[index],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
+                                    Text(City[index],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
                                     Spacer(),
 
                                     Radio(
                                         activeColor: color1,
-                                        value: 1,
-                                        groupValue: groupss[index],
-                                        onChanged: (T) {
+                                        value: City[index],
+                                        groupValue: groub,
+                                        onChanged: (T) async {
                                           print(T);
-                                          setState(() {
-                                            groupss.insert(index, T);
-                                            //groub = T;
+                                          setState(()  {
+                                            groub = T;
+                                            int postion = City.indexOf(T);
+                                            CityId =C[postion]['id'];
+                                            CityName = T;
+                                            //Navigator.pop(context);
+
+
+
+                                            //groupss.insert(index, T);
+
                                           });
+                                          // List check = await getDic(CityId);
+                                          //                                           // if(check.isNotEmpty){
+                                          //                                           //   setState((){
+                                          //                                           //     c = true;
+                                          //                                           //   });
+                                          //                                           // }
+                                          print(CityId);
                                         }),
                                     Text("  ")
                                   ],
@@ -359,23 +351,7 @@ class Home_userState extends State<Home_user>{
     }
     return StatefulBuilder(// You need this, notice the parameters below:
         builder: (BuildContext context, StateSetter setState) {
-          void onButtonPressedEE(context) {
-            showModalBottomSheet(
 
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.only(
-                      topLeft: const Radius.circular(22.0),
-                      topRight: const Radius.circular(22.0)),
-                ),
-                context: context,
-                isScrollControlled: true,
-                builder: (builder) {
-                  return FractionallySizedBox(
-                    heightFactor: 0.50,
-                    child: BigListViewWidgetEE(),
-                  );
-                });
-          }
 
           void onButtonPressedEEE(context) {
             showModalBottomSheet(
@@ -406,7 +382,26 @@ class Home_userState extends State<Home_user>{
               }
             });
           }
+          List<String> D = new List();
+          List Dicc= [];
+
+          getDic(id) async {
+            http.Response response = await http.get('https://amer.jit.sa/api/cities/$id',headers: {"Accept":"application/json"},);
+            Map map = json.decode(response.body);
+            print(map);
+            setState(() {
+              Dicc = map['data']['cities'];
+              for(int i = 0 ; i <Dicc.length; i++){
+                D.add(Dicc[i]['title']);
+              }
+            });
+            return D;
+            //onButtonPressedfloat(context);
+          }
           final Size size = MediaQuery.of(context).size;
+          int CityIdd,DicIdd;
+          List<String> ssss = new List();
+
           return Directionality(
               textDirection: TextDirection.rtl,
               child:Container(child:SingleChildScrollView(scrollDirection: Axis.vertical,child:Container(padding: EdgeInsets.only(left: 20,right: 20,top: 20),
@@ -691,79 +686,127 @@ class Home_userState extends State<Home_user>{
                       Row(children: [
                         Text("الموقع",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
                       ],),
-                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
-                        GestureDetector(onTap: (){
-                          print('bess');
-                          onButtonPressedEEE(context);
-                        },
-                          child:Row(children: [
-                            Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    topRight: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5),
-                                    bottomRight: Radius.circular(5)
-                                ),
-                              ),
-                              child: Column(children: [
-                                Row(children: [
-                                  Text('المدينة',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
-                                ],),
-                                SizedBox(height: size.height*0.01,),
-                                GestureDetector(onTap: (){
-                                  print('bess');
-                                },
-                                  child: Row(children: [
-                                    Text('قطن',style: TextStyle(fontSize: 16.0,fontFamily: 'jana',color: Colors.black)),
-                                    Spacer(),
-                                    Icon(Icons.arrow_drop_down,color: Colors.black,size: 22,),
-                                  ],),),
 
+                      Container(child:Row(mainAxisAlignment:MainAxisAlignment.spaceBetween,children: [
+                        Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                                bottomRight: Radius.circular(5)
+                            ),
+                          ),
+                          child: Column(children: [
+                            Row(children: [
+                              Text('المدينة',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                            ],),
+                            DropdownButtonHideUnderline(child:DropdownButton<String>(
+                              value: _value1,
+                              isExpanded: true,
+                              // items: [
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('قطن',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '1',
+                              //   ),
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('الرياض',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '2',
+                              //   ),
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('جده',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '3',
+                              //   ),
+                              // ],
+                              items: City.map((String value) {
+                                return new DropdownMenuItem<String>(
+                                  value: value,
+                                  child: new Text(value,style: TextStyle(color: Colors.black)),
+                                );
+                              }).toList(),
+                              onChanged: (String value) async {
+                                setState(()  {
+                                  int postion = City.indexOf(value);
+                                  print("$value");
+                                  _value1 = value;
+                                  CityId =C[postion]['id'];
 
-
-                              ],),
+                                  // _isChose = true;
+                                });
+                                ssss = await getDic(CityId);
+                                if(D.isNotEmpty){
+                                  setState(()  {
+                                    print("$ssss");
+                                    //D.addAll(ssss);
+                                   // Dis.addAll(cc);
+                                    Ha = true;
+                                  });
+                                }
+                              },
+                              hint: Text("الرياض",textAlign: TextAlign.center,style: TextStyle(
+                                  color: Colors.black,fontFamily: 'jana'),),
 
                             ),
-                          ],),),
-                        GestureDetector(onTap: (){
-                          print('bess');
-                          onButtonPressedEE(context);
-                        },
-                          child:Row(children: [
-                            Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[300],
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(5),
-                                    topRight: Radius.circular(5),
-                                    bottomLeft: Radius.circular(5),
-                                    bottomRight: Radius.circular(5)
-                                ),
-                              ),
-                              child: Column(children: [
-                                Row(children: [
-                                  Text('الحي',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
-                                ],),
-                                SizedBox(height: size.height*0.01,),
-                                GestureDetector(onTap: (){
-                                  print('bess');
-                                },
-                                  child: Row(children: [
-                                    Text('الحي',style: TextStyle(fontSize: 16.0,fontFamily: 'jana',color: Colors.black)),
-                                    Spacer(),
-                                    Icon(Icons.arrow_drop_down,color: Colors.black,size: 22,),
-                                  ],),),
+                            ),
+                          ],),
 
-
-
-                              ],),
+                        ),
+                        (Ha== false)?Container():Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                                bottomRight: Radius.circular(5)
+                            ),
+                          ),
+                          child: Column(children: [
+                            Row(children: [
+                              Text('الحي',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                            ],),
+                            DropdownButtonHideUnderline(child:DropdownButton<String>(
+                              value: _value2,
+                              isExpanded: true,
+                              // items: [
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('قطن',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '1',
+                              //   ),
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('الرياض',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '2',
+                              //   ),
+                              //   DropdownMenuItem<String>(
+                              //     child: Text('جده',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                              //     value: '3',
+                              //   ),
+                              // ],
+                              items: ssss.map((String value) {
+                                return new DropdownMenuItem<String>(
+                                  value: value,
+                                  child: new Text(value,style: TextStyle(color: Colors.black)),
+                                );
+                              }).toList(),
+                              onChanged: (String value) {
+                                setState(() {
+                                  int postion = D.indexOf(value);
+                                  print("$value");
+                                  _value2 = value;
+                                  DicId =Dis[postion]['id'];
+                                  // _isChose = true;
+                                });
+                              },
+                              hint: Text("الرياض",textAlign: TextAlign.center,style: TextStyle(
+                                  color: Colors.black,fontFamily: 'jana'),),
 
                             ),
-                          ],),),
-                      ],),
+                            ),
+                          ],),
 
+                        ),
+                      ],),),
                       SizedBox(height: size.height*0.02,),
                       Row(children: [
                         Text("الميزانية المتاحة",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
@@ -833,9 +876,13 @@ class Home_userState extends State<Home_user>{
                       ],),
                       SizedBox(height: size.height*0.02,),
                       Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
-                        onTap: (){
-                          print("Container clicked");
-                          Navigator.pop(context);
+                        onTap: () async {
+                          //print("Container clicked");
+                          //Navigator.pop(context);
+                          //await uploadmultipleimage(ImageFiles);
+                          //String Res = await CreateOrder(ImageFiles,context) ;
+                         // onBackPress(context,"$Res");
+                         // print(Res);
                           //Navigator.pushNamed(context, "NewOrder2");
                         },
                         child:Container(width:size.width*0.80,padding: EdgeInsets.only(left: 8,right:8,top: 8,bottom: 8),
@@ -874,7 +921,14 @@ class Home_userState extends State<Home_user>{
                   )),)));
         });
   }
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getIndex();
+   // getCity();
+    //getCat();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -885,7 +939,10 @@ class Home_userState extends State<Home_user>{
       child:
       //Stack(children: [
 
-        Container(child:SingleChildScrollView(scrollDirection: Axis.vertical,child:Container(child: Column(children: [
+      (C == null)?Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(color1),
+          )):Container(child:SingleChildScrollView(scrollDirection: Axis.vertical,child:Container(child: Column(children: [
           Container(height:size.height*0.25,decoration: BoxDecoration(
             color: color1,
             borderRadius: BorderRadius.only(
@@ -972,8 +1029,8 @@ class Home_userState extends State<Home_user>{
           Container(margin:EdgeInsets.only(left: 20,right: 20),child: Column(children: [
             SizedBox(height: 10,),
 
-            Container(margin: EdgeInsets.only(top: 10,  bottom: 20),padding:EdgeInsets.all(10),
-             // height: size.height*0.45,
+           (C.isEmpty)?Container(margin: EdgeInsets.only(top: 10,  bottom: 20),padding:EdgeInsets.all(10),
+              // height: size.height*0.45,
               width: size.width*0.90,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -987,7 +1044,7 @@ class Home_userState extends State<Home_user>{
               child: Column(children: [
                 RawMaterialButton(
                   onPressed: () {},
-                 // elevation: 2.0,
+                  // elevation: 2.0,
                   fillColor: color1,
                   child: Icon(
                     Icons.shopping_cart_outlined,
@@ -1012,8 +1069,209 @@ class Home_userState extends State<Home_user>{
                 Text("إرسل طلبك الاول للحصول على عرض", style: TextStyle(color: Colors.grey,fontFamily: 'jana',
                     fontSize: 14,fontWeight: FontWeight.bold),),
               ],),
-            ),
+            ):ListView.builder(
+                shrinkWrap: true,
+                //scrollDirection: Axis.horizontal,
+                controller: _scrollController,
+                itemCount: C.length,
+                itemBuilder: (BuildContext context, int index){
+                  List<String> Img = new List();
+                  List X = C[index]['vendors'];
+                 // List Img=[];
+                  Img.clear();
+                  for(int i =0;i<X.length;i++){
+                     Img.add(X[i]['image']);
+                  }
 
+                  return GestureDetector(onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => order_details(id: C[index]['id'],),
+                        ));
+                  },child:Container(margin: EdgeInsets.only(top: 10,  bottom: 20),padding:EdgeInsets.all(10),
+                    //height: size.height*0.45,
+                    width: size.width*0.90,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)
+                      ),
+                    ),
+                    child: Column(children: [
+                      Row(children: [
+                        new RaisedButton(
+                          onPressed: () async {
+
+                          },
+                          color: (C[index]['status_text']==2)?color6:color2,
+                          child: new Row(
+                            children: <Widget>[
+                              new Text("${C[index]['status_text']}"+"   ",
+                                  style: new TextStyle(
+                                      fontSize: 15,
+                                      color:(C[index]['status_text']==2)?color3:  color1,
+                                      fontFamily: 'jana'
+                                  )),
+                              new Icon(
+                                Icons.flag,
+                                color:(C[index]['status_text']==2)?color3: color1,
+                              )
+                            ],
+                          ),
+                        ),
+                        Spacer(),
+                        Container(
+                          child: new Row(
+                            children: <Widget>[
+                              new Text("${C[index]['created_at']}" + " ",
+                                  style: new TextStyle(
+                                      fontSize: 15,
+                                      color:  Colors.grey,
+                                      fontFamily: 'jana'
+                                  )),
+                              new Icon(
+                                Icons.access_alarm_rounded,
+                                color: Colors.grey,
+                              )
+                            ],
+                          ),),
+                      ],),
+                      Container(
+                        width: 300,
+                        child: Text(
+                          "${C[index]['title']}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          textAlign:TextAlign.right,
+                          style: TextStyle(fontFamily: 'jana',fontSize: 16,fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      Container(
+                        width: 300,
+                        child: Text(
+                          "${C[index]['description']}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          textAlign:TextAlign.right,
+                          style: TextStyle(fontFamily: 'jana',color: Colors.grey),
+                        ),
+                      ),
+                      SizedBox(height: 5,),
+                      Row(children: [
+                        Expanded(flex: 2,child:Stack(children: [
+
+                          Container(padding:EdgeInsets.only(left: 10,right: 10),width:130,height:35,decoration: BoxDecoration(
+                            color: color4,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                                bottomRight: Radius.circular(5)
+                            ),
+                          ),child: new Row(
+                            children: <Widget>[
+
+                            ],
+                          ),),
+                          Container(padding:EdgeInsets.only(left: 8,right: 8),width:100,height:35,decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(5),
+                                topRight: Radius.circular(5),
+                                bottomLeft: Radius.circular(5),
+                                bottomRight: Radius.circular(5)
+                            ),
+                          ),child: new Row(
+                            children: <Widget>[
+                              new Icon(
+                                Icons.assignment_turned_in_outlined,
+                                color: Colors.white,
+                              ),
+                              new Text("${C[index]['requests_count']} عرض",
+                                  style: new TextStyle(
+                                      fontSize: 15,
+                                      color:  Colors.white,
+                                      fontFamily: 'jana'
+                                  )),
+
+                            ],
+                          ),),
+                        ],),),
+                        Expanded(flex: 1,child: Container(margin:EdgeInsets.only(left: 8,right: 8),padding:EdgeInsets.only(left: 10,right: 10),width:60,height:35,decoration: BoxDecoration(
+                          color: color4,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              topRight: Radius.circular(5),
+                              bottomLeft: Radius.circular(5),
+                              bottomRight: Radius.circular(5)
+                          ),
+                        ),child: new Row(
+                          children: <Widget>[
+                            new Text("${C[index]['rejected_requests_count']}"+" ",
+                                style: new TextStyle(
+                                    fontSize: 15,
+                                    color:  color5,
+                                    fontFamily: 'jana'
+                                )),
+                            new Icon(
+                              Icons.message_sharp,
+                              color: color5,
+                            )
+                          ],
+                        ),),),
+                        Expanded(flex: 1,child:Container(padding:EdgeInsets.only(left: 10,right: 10),width:60,height:35,decoration: BoxDecoration(
+                          color: color4,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(5),
+                              topRight: Radius.circular(5),
+                              bottomLeft: Radius.circular(5),
+                              bottomRight: Radius.circular(5)
+                          ),
+                        ),child: new Row(
+                          children: <Widget>[
+                            new Text("${C[index]['valid_requests_count']}"+" ",
+                                style: new TextStyle(
+                                    fontSize: 15,
+                                    color:  color5,
+                                    fontFamily: 'jana'
+                                )),
+                            new Icon(
+                              Icons.assignment_turned_in_outlined,
+                              color: color5,
+                            )
+                          ],
+                        ),),),
+
+
+                      ],),
+                      SizedBox(height: 5,),
+                      Row(children: [
+
+                        ImageStack(
+                          imageList: Img,
+                          imageRadius: 45, // Radius of each images
+                          imageCount: 3,
+                          totalCount: Img.length,// Maximum number of images to be shown in stack
+                          imageBorderWidth: 3,
+                          imageBorderColor: color1,
+                          backgroundColor: color2,// Border width around the images
+                        ),
+                        SizedBox(width: 5,),
+                       // Text("خمس عروض جديده",style: TextStyle(fontFamily: 'jana'),),
+                        Spacer(),
+                        Text("${C[index]['price_from']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
+                        SizedBox(width: 10,),
+                        Text("الى",style: TextStyle(fontFamily: 'jana'),),
+                        SizedBox(width: 10,),
+                        Text("${C[index]['price_to']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
+                      ],),
+                    ],),
+                  ),);
+                }),
           ],),),
 
         ],),)),),
@@ -1049,6 +1307,27 @@ class Home_userState extends State<Home_user>{
 
     );
   }
+  void getIndex() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    http.Response response = await http.get('https://amer.jit.sa/api/user/home',headers: { HttpHeaders.authorizationHeader: T,"Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    if(response.statusCode == 200){
+      setState(() {
+        C = map['data']['active_orders'];
+        //City = map['data']['cities'];
+      });
+    }else{
+      setState(() {
+        C = [];
+      });
+
+    }
+
+
+  }
+
 
 }
 //262b39
@@ -1156,11 +1435,11 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
           child: InkWell(
             onTap: () {
               if(index == 3){
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Home_user(),
-                    ));
+                // Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => Home_user(),
+                //     ));
               }else if(index == 2){
                 Navigator.pushReplacement(
                     context,

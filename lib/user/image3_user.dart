@@ -3,6 +3,7 @@ import 'package:amr/user/image2_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../BNBCustompain.dart';
 import 'Registration_user.dart';
@@ -34,7 +35,9 @@ class NextPage3_userState extends State<NextPage3_user> {
               SizedBox(width: 50,),
               Spacer(),
               GestureDetector(
-                onTap: (){
+                onTap: () async {
+                  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+                  sharedPrefs.setString('intro', '1');
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
@@ -87,7 +90,9 @@ class NextPage3_userState extends State<NextPage3_user> {
                     //side: BorderSide(color: Colors.red)
                 ),
                 color: color1,
-                onPressed: (){
+                onPressed: () async {
+                  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+                  sharedPrefs.setString('intro', '1');
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(

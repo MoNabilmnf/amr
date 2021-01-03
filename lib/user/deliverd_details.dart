@@ -1,11 +1,18 @@
+import 'package:amr/Global.dart';
 import 'package:amr/user/Home_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../BNBCustompain.dart';
 
 class deliverd_details extends StatefulWidget{
+  deliverd_details({this.id,this.title,this.price});
+  int id;
+  String title,price;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -61,7 +68,7 @@ class deliverd_detailsState extends State<deliverd_details>{
               ),
             ),child: Row(children: [
               Column(children: [
-                Text("35000 رس",
+                Text("${widget.price} رس",
                     style: new TextStyle(
                         fontSize: size.width*0.04,
                         color:  Colors.green,
@@ -114,7 +121,7 @@ class deliverd_detailsState extends State<deliverd_details>{
                     fontFamily: 'jana'
                 )),
             Spacer(),
-            Text("شقة في شمال الرياض - 4 غرف",
+            Text("${widget.title}",
                 style: new TextStyle(
                     fontSize: size.width*0.03,
                     color:  Colors.grey,
@@ -172,14 +179,21 @@ class deliverd_detailsState extends State<deliverd_details>{
           new Align(
                 alignment: FractionalOffset.bottomCenter,
                 child: GestureDetector(
-                  onTap: (){
+                  onTap: () async {
                     print("Container clicked");
-                    Navigator.pop(context);
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Home_user(),
-                        ));
+                    String Res = await  AddAPI();
+                    if(Res == "success"){
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Home_user(),
+                          ));
+                    }else{
+                      onBackPress(context,Res);
+                    }
+
                     //Navigator.pushNamed(context, "NewOrder2");
                   },
                   child:Container(width:size.width*0.80,padding: EdgeInsets.only(left: 8,right:8,top: 8,bottom: 8),
@@ -219,7 +233,26 @@ class deliverd_detailsState extends State<deliverd_details>{
       ],),),),),
     );
   }
-
+  AddAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    var d ={
+      "offer_id":"${widget.id}",
+      "note":"${_controller.text}"
+    };
+    http.Response response = await http.post('https://amer.jit.sa/api/user/offer/add-buy-request', body: d,
+        headers: {HttpHeaders.authorizationHeader:  T,
+          "Accept": "application/json",
+        });
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if (response.statusCode == 200) {
+      return 'success';
+    } else {
+      print(response.statusCode.toString());
+      return responsebody['data']['message'].toString();
+    }
+  }
 }
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');

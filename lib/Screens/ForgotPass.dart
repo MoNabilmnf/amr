@@ -1,8 +1,12 @@
 import 'dart:ui';
-
+import 'package:amr/Global.dart';
+import 'package:amr/Screens/PassCode.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../BNBCustompain.dart';
 
@@ -13,6 +17,7 @@ class ForgotPass extends StatefulWidget {
 }
 
 class ForgotPassState extends State<ForgotPass> {
+  int name = 0;
   final TextEditingController _controller = new TextEditingController();
   Color color1 = colorFromHex("f6755f");
   @override
@@ -50,7 +55,7 @@ class ForgotPassState extends State<ForgotPass> {
                   fontWeight: FontWeight.bold
               ),
               ),
-              Text("قم بإدخال البريد الإلكتروني لإرسال رمز التأكيد", style: TextStyle(
+              Text("قم بإدخال رقم الجوال لإرسال رمز التأكيد", style: TextStyle(
                 color: Colors.grey,
                 fontFamily: 'jana',
                 fontSize: 14,
@@ -59,35 +64,66 @@ class ForgotPassState extends State<ForgotPass> {
               ),
               SizedBox(height: size.height*0.03,),
 
-              Text('البريد الإلكتروني (إختياري)',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+              Text('رقم الجوال (إختياري)',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color:(name == 1)?color1: Colors.grey)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Container(
-
-                    child: TextField(
-                      textAlign: TextAlign.center,
-                      controller: _controller,
-                      keyboardType: TextInputType.text,
-                      maxLength: 50,
-                      style: new TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontFamily: "jana",
-                          fontStyle: FontStyle.normal,
-                          fontSize: 14.0
-                      ),
-                      decoration: InputDecoration(
-                        counterText: '',
-                        border: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        hintText: 'exampile_email@domain.com',
-                        hintStyle: TextStyle(color: Colors.black),
-                      ),
-                    ),width: MediaQuery.of(context).size.width * 0.8
+                      child: TextField(
+                        onChanged: (text) {
+                          print("text $text");
+                          setState(() {
+                            (text.isEmpty)?name = 0:name = 1;
+                            // phone = 1;
+                          });
+                        },
+                        textAlign: TextAlign.center,
+                        controller: _controller,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 50,
+                        style: new TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "jana",
+                            fontStyle: FontStyle.normal,
+                            fontSize: 14.0
+                        ),
+                        decoration: InputDecoration(
+                          counterText: '',
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                          hintText: '+201003578367',
+                          hintStyle: TextStyle(color: Colors.black),
+                        ),
+                      ),width: MediaQuery.of(context).size.width * 0.8
                   ),
+                  // Container(
+                  //
+                  //   child: TextField(
+                  //     textAlign: TextAlign.center,
+                  //     controller: _controller,
+                  //     keyboardType: TextInputType.text,
+                  //     maxLength: 50,
+                  //     style: new TextStyle(
+                  //         fontWeight: FontWeight.bold,
+                  //         fontFamily: "jana",
+                  //         fontStyle: FontStyle.normal,
+                  //         fontSize: 14.0
+                  //     ),
+                  //     decoration: InputDecoration(
+                  //       counterText: '',
+                  //       border: InputBorder.none,
+                  //       focusedBorder: InputBorder.none,
+                  //       enabledBorder: InputBorder.none,
+                  //       errorBorder: InputBorder.none,
+                  //       disabledBorder: InputBorder.none,
+                  //       hintText: 'exampile_email@domain.com',
+                  //       hintStyle: TextStyle(color: Colors.black),
+                  //     ),
+                  //   ),width: MediaQuery.of(context).size.width * 0.8
+                  // ),
                 ],
               ),
 
@@ -102,8 +138,38 @@ class ForgotPassState extends State<ForgotPass> {
                     //side: BorderSide(color: Colors.red)
                   ),
                   color: color1,
-                  onPressed: (){
-                    Navigator.pushReplacementNamed(context, "Home");
+                  onPressed: () async {
+
+
+                      if(user_type == 'مشتري'){
+                        String Res = await AddPhone(_controller.text,'https://amer.jit.sa/api/user/password/send-reset-code');
+
+                        if(Res == "success"){
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PassCode(),
+                              ));
+                        }else{
+                          onBackPress(context,"$Res");
+                        }
+                      }else{
+                        String Res = await AddPhone(_controller.text,'https://amer.jit.sa/api/vendor/password/send-reset-code');
+                        if(Res == "success"){
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PassCode(),
+                              ));
+                        }else{
+                          onBackPress(context,"$Res");
+                        }
+
+                      }
+
+
+                    // AddPhone(_controller.text);
+                    // Navigator.pushReplacementNamed(context, "Home");
                   },
                   child: Row(mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -123,4 +189,24 @@ class ForgotPassState extends State<ForgotPass> {
 
     );
   }
+  AddPhone(phone,url) async {
+    Map<String, dynamic> d ={
+      "phone":"$phone"
+    };
+    http.Response response = await http.post('$url',body: json.encode(d),headers: { "Accept":"application/json",'Content-type': 'application/json',});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      // SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      // sharedPrefs.setString('token', '${responsebody['data']['token']}');
+      // sharedPrefs.setString('UserId', '${responsebody['data']['id']}');
+      return 'success';
+    }else{
+      return responsebody['data']['message'].toString();
+    }
+  }
+}
+Color colorFromHex(String hexColor) {
+  final hexCode = hexColor.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
 }

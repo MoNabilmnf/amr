@@ -10,15 +10,15 @@ import '../BNBCustompain.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Code extends StatefulWidget{
+class PassCode extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return CodeState();
+    return PassCodeState();
   }
 
 }
-class CodeState extends State<Code>{
+class PassCodeState extends State<PassCode>{
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
   final TextEditingController _pinPutController = TextEditingController();
@@ -29,6 +29,8 @@ class CodeState extends State<Code>{
   String no3 ='';
   String no4 ='';
   String value;
+  int password2 = 0 , phone = 0 , email= 0 , password= 0;
+  //Color color1 = ;
   //Color color1 = colorFromHex("f6755f");
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class CodeState extends State<Code>{
           ),
 
           Text(
-            'تم إرسال رمز تأكيد الى جوالك قم بكتابة الرمز',
+            'تم إرسال رمز تأكيد الى جوالك قم بكتابة الرمز ثم كلمة السر ',
             style: TextStyle(
               color: Colors.white70,
               fontFamily: 'jana',
@@ -61,19 +63,19 @@ class CodeState extends State<Code>{
               fontWeight: FontWeight.bold,
             ),
           ),
-          GestureDetector(onTap: (){
-
-          },child:Text(
-            'لم تستلم رمز ؟',
-            style: TextStyle(
-              color: Colors.white70,
-              fontFamily: 'jana',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
+        //   GestureDetector(onTap: (){
+        //
+        //   },child:Text(
+        //     'لم تستلم رمز ؟',
+        //     style: TextStyle(
+        //       color: Colors.white70,
+        //       fontFamily: 'jana',
+        //       fontSize: 14,
+        //       fontWeight: FontWeight.bold,
+        //       decoration: TextDecoration.underline,
+        //     ),
+        //   ),
+        // ),
 
           SizedBox(height: 20,),
 
@@ -114,10 +116,88 @@ class CodeState extends State<Code>{
               ),
             ),
           ),
+          Text('كلمة المرور',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.white)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+
+                  child: TextField(
+                    onChanged: (text) {
+                      print("text $text");
+                      setState(() {
+                        (text.isEmpty)?password = 0:password = 1;
+                        // phone = 1;
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _controller,
+                    keyboardType: TextInputType.visiblePassword,
+                    obscureText: true,
+                    maxLength: 50,
+                    style: new TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "jana",
+                        fontStyle: FontStyle.normal,
+                        fontSize: 14.0
+                    ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: '********************',
+                      hintStyle: TextStyle(color: Colors.white),
+                    ),
+                  ),width: MediaQuery.of(context).size.width * 0.8
+              ),
+            ],
+          ),
+          Text('تأكيد كلمة المرور',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.white)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+
+                  child: TextField(
+                    onChanged: (text) {
+                      print("text $text");
+                      setState(() {
+                        (text.isEmpty)?password = 0:password = 1;
+                        // phone = 1;
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _controller2,
+                    keyboardType: TextInputType.visiblePassword,
+                    obscureText: true,
+                    maxLength: 50,
+                    style: new TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "jana",
+                        fontStyle: FontStyle.normal,
+                        fontSize: 14.0
+                    ),
+                    decoration: InputDecoration(
+                      counterText: '',
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      errorBorder: InputBorder.none,
+                      disabledBorder: InputBorder.none,
+                      hintText: '********************',
+                      hintStyle: TextStyle(color: Colors.white),
+                    ),
+                  ),width: MediaQuery.of(context).size.width * 0.8
+              ),
+            ],
+          ),
           SizedBox(height: 40,),
           GestureDetector(
             onTap: () async {
-              String Res = await AddCode(_pinPutController.text);
+              String Res = await AddCode(_pinPutController.text,_controller.text,_controller2.text);
               if(Res == 'success'){
                 if(user_type == 'مشتري'){
                   Navigator.pushReplacement(
@@ -182,22 +262,28 @@ class CodeState extends State<Code>{
     final hexCode = hexColor.replaceAll('#', '');
     return Color(int.parse('FF$hexCode', radix: 16));
   }
-  AddCode(code) async {
+  AddCode(code,new_password,new_password_confirmation) async {
     Map<String, dynamic> d ={
-      "code":"$code"
+      "code":"$code",
+      "new_password":"$new_password",
+      "new_password_confirmation":"$new_password_confirmation"
     };
-    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-    http.Response response = await http.post((sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/verify':'https://amer.jit.sa/api/vendor/verify',body: json.encode(d),headers: { "Accept":"application/json",'Content-type': 'application/json',});
+    String URL = (user_type == 'مشتري')?"https://amer.jit.sa/api/user/password/reset":"https://amer.jit.sa/api/vendor/password/reset";
+    http.Response response = await http.post('$URL',body: json.encode(d),headers: { "Accept":"application/json",'Content-type': 'application/json',});
     print(response.body.toString());
     var responsebody = json.decode(response.body);
     if(response.statusCode == 200){
-      //SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-      sharedPrefs.setString('token', '${responsebody['data']['token']}');
-      sharedPrefs.setString('UserId', '${responsebody['data']['id']}');
-      sharedPrefs.setString('UserType', '$user_type');
+      // SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      // sharedPrefs.setString('token', '${responsebody['data']['token']}');
+      // sharedPrefs.setString('UserId', '${responsebody['data']['id']}');
       return 'success';
     }else{
       return responsebody['data']['message'].toString();
     }
   }
+
+}
+Color colorFromHex(String hexColor) {
+  final hexCode = hexColor.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
 }

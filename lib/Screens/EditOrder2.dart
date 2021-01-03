@@ -10,19 +10,19 @@ import 'package:flutter/material.dart';
 
 import '../Global.dart';
 
-class NewOrder2 extends StatefulWidget{
-  NewOrder2({this.Images,this.CatId,this.title,this.description});
-  final int CatId;
-  final String title,description;
+class EditOrder2 extends StatefulWidget{
+  EditOrder2({this.id,this.Images,this.CatId,this.title,this.description,this.CityName,this.DisName,this.price,this.CityId,this.DicId});
+  final int CatId,id,CityId,DicId;
+  final String title,description,CityName,DisName,price;
   final List<File> Images;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return NewOrder2State();
+    return EditOrder2State();
   }
 
 }
-class NewOrder2State extends State<NewOrder2>{
+class EditOrder2State extends State<EditOrder2>{
   List<String> Cats = new List();
   List<String> City = new List();
   List<String> SubCat = new List();
@@ -46,6 +46,9 @@ class NewOrder2State extends State<NewOrder2>{
     // TODO: implement initState
     super.initState();
     getCity();
+    _controller2.text = widget.price;
+    CityId = widget.CityId;
+    DicId = widget.DicId;
   }
   @override
   Widget build(BuildContext context) {
@@ -117,15 +120,15 @@ class NewOrder2State extends State<NewOrder2>{
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Text('المدينة',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontFamily: 'jana',
-                                  color: Colors.grey)),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Text('المدينة',
+                      //         style: TextStyle(
+                      //             fontSize: 12.0,
+                      //             fontFamily: 'jana',
+                      //             color: Colors.grey)),
+                      //   ],
+                      // ),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _value1,
@@ -174,7 +177,7 @@ class NewOrder2State extends State<NewOrder2>{
                             // }
                           },
                           hint: Text(
-                            "المدينة",
+                            "${widget.CityName}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
@@ -185,9 +188,10 @@ class NewOrder2State extends State<NewOrder2>{
                     ],
                   ),
                 ),
-                (DDD.isEmpty)
-                    ? Container()
-                    : Container(
+                // (DDD.isEmpty)
+                //     ? Container()
+                //     :
+                Container(
                   width: size.width * 0.40,
                   height: size.height * 0.12,
                   padding: EdgeInsets.only(left: 8, right: 8),
@@ -201,15 +205,15 @@ class NewOrder2State extends State<NewOrder2>{
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Text('الحي',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontFamily: 'jana',
-                                  color: Colors.grey)),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Text('الحي',
+                      //         style: TextStyle(
+                      //             fontSize: 12.0,
+                      //             fontFamily: 'jana',
+                      //             color: Colors.grey)),
+                      //   ],
+                      // ),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _value2,
@@ -246,7 +250,7 @@ class NewOrder2State extends State<NewOrder2>{
                             });
                           },
                           hint: Text(
-                            "الحي",
+                            "${widget.DisName}",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.black,
@@ -308,8 +312,9 @@ class NewOrder2State extends State<NewOrder2>{
               }else if(_controller2.text.isEmpty){
                  onBackPress(context,"أضف سعر");
                }else{
-                 String Res = await CreateOffer(widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
+                 String Res = await UpdateOffer(widget.id,widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
                  if(Res == 'Success'){
+                   Navigator.pop(context);
                    Navigator.pop(context);
                    Navigator.pushReplacementNamed(context, "Home");
                  }else{

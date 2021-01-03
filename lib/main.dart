@@ -1,5 +1,7 @@
 import 'package:amr/Screens/Home.dart';
 import 'package:amr/Screens/Registration.dart';
+import 'package:amr/user/ForgotPass_user.dart';
+import 'package:amr/user/Home_user.dart';
 import 'package:amr/user/image3_user.dart';
 import 'package:amr/user_type.dart';
 import 'package:device_preview/device_preview.dart';
@@ -15,6 +17,7 @@ import 'Screens/Editpassword.dart';
 import 'Screens/ForgotPass.dart';
 import 'Screens/NewOrder.dart';
 import 'Screens/NewOrder2.dart';
+import 'Screens/PassCode.dart';
 import 'Screens/Results.dart';
 import 'Screens/all_offers.dart';
 import 'Screens/discover.dart';
@@ -25,14 +28,16 @@ import 'Screens/login.dart';
 import 'Screens/messages.dart';
 import 'Screens/notification.dart';
 import 'Screens/order_ditails.dart';
+import 'Screens/send_your_order.dart';
 import 'Screens/settings.dart';
 import 'Screens/splash.dart';
 
 void main() => runApp(
-  DevicePreview(
-    enabled: !kReleaseMode,
-    builder: (context) => MyApp(), // Wrap your app
-  ),
+  // DevicePreview(
+  //   enabled: !kReleaseMode,
+  //   builder: (context) =>  // Wrap your app
+  // ),
+  MyApp(),
 );
 
 // void main() {
@@ -48,8 +53,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-         locale: DevicePreview.locale(context), // Add the locale here
-         builder: DevicePreview.appBuilder,
+         // locale: DevicePreview.locale(context), // Add the locale here
+         // builder: DevicePreview.appBuilder,
         theme: ThemeData(
         // This is the theme of your application.
         //
@@ -66,7 +71,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-     // home: NextPage3_user(),
+      //home: send_your_order(),
       home: Splash(),
         routes: <String, WidgetBuilder>{
           "notification": (BuildContext context) => new notification(),
@@ -88,6 +93,7 @@ class MyApp extends StatelessWidget {
           "NextPage3": (BuildContext context) => new NextPage3(),
           "Registration": (BuildContext context) => new Registration(),
           "Login": (BuildContext context) => new Login(),
+          "ForgotPass_user": (BuildContext context) => new ForgotPass(),
           "user_type": (BuildContext context) => new user_type(),
           "Code": (BuildContext context) => new Code(),
         }

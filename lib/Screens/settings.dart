@@ -1,6 +1,9 @@
+import 'package:amr/APIs/Api.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amr/Screens/ChatScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../BNBCustompain.dart';
 
@@ -202,8 +205,11 @@ class settingsState extends State<settings>{
             ],),),),
           SizedBox(height: 8,),
           GestureDetector(
-            onTap: (){
+            onTap: () async {
               print("Container clicked");
+              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+              sharedPrefs.remove('UserType');
+              print(sharedPrefs.getString('UserType'));
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -216,9 +222,20 @@ class settingsState extends State<settings>{
           Divider(height: 2,),
           SizedBox(height: 8,),
           GestureDetector(
-            onTap: (){
+            onTap: () async {
+              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
               print("Container clicked");
-              Navigator.pushReplacementNamed(context, "Login");
+             // Navigator.pushReplacementNamed(context, "Login");
+              sharedPrefs.remove('UserType');
+              String Res = await Logout('https://amer.jit.sa/api/vendor/logout');
+              if(Res == "success"){
+                sharedPrefs.remove('UserType');
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Login_user(),
+                    ));
+              }
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 10,),

@@ -1,11 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../BNBCustompain.dart';
 import 'deliverd_details.dart';
 
 class details_price extends StatefulWidget{
+  details_price({this.id});
+  int id;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -17,7 +22,14 @@ class details_priceState extends State<details_price>{
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
   int groub = 0;
+  Map OfferData;
   Color color1 = colorFromHex("f6755f");
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getprofileData();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -29,7 +41,7 @@ class details_priceState extends State<details_price>{
 
             width: double.infinity,decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("images/build.png"), fit: BoxFit.cover)),child:
+              image: NetworkImage((OfferData==null)?"":"${OfferData['images']}"), fit: BoxFit.cover)),child:
         Column(children: [
           SizedBox(height: size.height*0.30,),
           Container(margin: EdgeInsets.all(size.height*0.02,),child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
@@ -56,7 +68,7 @@ class details_priceState extends State<details_price>{
                 ),
                 child: Text('     '),
               ),
-              Icon(Icons.favorite,color: Colors.red,size: size.height*0.045,),
+              (OfferData==null)?Container():Icon((OfferData['is_favorite']==true)?Icons.favorite_border:Icons.favorite,color: Colors.red,size: size.height*0.045,),
             ],),
           ],),),
 
@@ -77,7 +89,7 @@ class details_priceState extends State<details_price>{
               child: Column(
                 children: <Widget>[
                   Row(children: [
-                    Text("شقه في شمال الرياض - 4 غرف"+"   ",
+                    Text((OfferData==null)?"":"${OfferData['title']}",
                         style: new TextStyle(
                             fontSize: size.width*0.045,
                             color:  Colors.black,
@@ -86,7 +98,7 @@ class details_priceState extends State<details_price>{
                         )),
                   ],),
                   Row(children: [
-                    Text("35000 رس"+"   ",
+                    Text((OfferData==null)?"":"${OfferData['price']} رس"+"   ",
                         style: new TextStyle(
                             fontSize: size.width*0.10,
                             color:  Colors.green,
@@ -95,7 +107,8 @@ class details_priceState extends State<details_price>{
                         )),
                   ],),
                   Row(children: [
-                    Text("شقه في عماره جديده مكونه من :",
+                    Text((OfferData==null)?"":"${OfferData['description']}",
+                        maxLines: 5,
                         style: new TextStyle(
                             fontSize: size.width*0.03,
                             color:  Colors.grey,
@@ -103,42 +116,7 @@ class details_priceState extends State<details_price>{
                             fontFamily: 'jana'
                         )),
                   ],),
-                  Row(children: [
-                    Text("1- ثلاث غرف نوم",
-                        style: new TextStyle(
-                            fontSize: size.width*0.03,
-                            color:  Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'jana'
-                        )),
-                  ],),
-                  Row(children: [
-                    Text("2- صالة",
-                        style: new TextStyle(
-                            fontSize: size.width*0.03,
-                            color:  Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'jana'
-                        )),
-                  ],),
-                  Row(children: [
-                    Text("3- مجلس",
-                        style: new TextStyle(
-                            fontSize: size.width*0.03,
-                            color:  Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'jana'
-                        )),
-                  ],),
-                  Row(children: [
-                    Text("مطبخ و مكيفات راكبة",
-                        style: new TextStyle(
-                            fontSize: size.width*0.03,
-                            color:  Colors.grey,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'jana'
-                        )),
-                  ],),
+
                   Spacer(),
                    Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
                     onTap: (){
@@ -146,7 +124,7 @@ class details_priceState extends State<details_price>{
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => deliverd_details(),
+                            builder: (context) => deliverd_details(id: OfferData['id'],price: OfferData['price'],title: OfferData['title'],),
                           ));
                       //Navigator.pushNamed(context, "NewOrder2");
                     },
@@ -186,7 +164,21 @@ class details_priceState extends State<details_price>{
       ],),),),
     );
   }
+  void getprofileData() async {
+    print("id is ${widget.id}");
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/user/offer/show/${widget.id}',
+      headers: {HttpHeaders.authorizationHeader: "$token","Accept": "application/json"},
+    );
+    Map map = json.decode(response.body);
+    print(map);
+    setState(() {
+      OfferData = map['data']['offer'];
 
+    });
+  }
 }
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');

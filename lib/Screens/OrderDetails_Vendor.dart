@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:amr/Screens/EditOrder.dart';
 import 'package:amr/Screens/send_your_order.dart';
 import 'package:amr/user/UserOrder.dart';
 import 'package:amr/user/UserOrderupdate.dart';
@@ -15,17 +16,17 @@ import 'dart:convert';
 
 import 'all_offers.dart';
 
-class order_details extends StatefulWidget{
-  order_details({this.id});
+class order_details_vendor extends StatefulWidget{
+  order_details_vendor({this.id});
   final int id;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return order_detailsState();
+    return order_details_vendorState();
   }
 
 }
-class order_detailsState extends State<order_details>{
+class order_details_vendorState extends State<order_details_vendor>{
   Color color1 = colorFromHex("f6755f");
   Color color2 = colorFromHex("#FEF2EF");
   Color color3 = colorFromHex("#0acb83");
@@ -34,10 +35,9 @@ class order_detailsState extends State<order_details>{
   Color color6 = colorFromHex("##e6faf2");
   Color color7 = colorFromHex("#242a38");
   Map C ;
-  String username = '' , imageProfile = '';
   List SS = [];
   List img = [];
-  List ImageFiles;
+  String username = '' , imageProfile = '';
   int main = 1;
   List<String> images = ["https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg", "https://www.caa.com/sites/default/files/styles/headshot_500x500/public/speaker-headshots/ParsonsJ_headshot_web.jpg?itok=iu-I0aZJ"];
   @override
@@ -48,7 +48,7 @@ class order_detailsState extends State<order_details>{
     getAPI();
   }
   ScrollController _scrollController = ScrollController();
-  void onButtonPressedfloat(context,Images,Title,Description,Catsid,SubCatsId,CityId,DisId,priceFrom,priceTo,CityName,DisName,) {
+  void onButtonPressedfloat(context) {
     showModalBottomSheet(
 
         shape: RoundedRectangleBorder(
@@ -61,53 +61,9 @@ class order_detailsState extends State<order_details>{
         builder: (builder) {
           return FractionallySizedBox(
             heightFactor: 0.90,
-            child: UserOrderupdate(id: widget.id,CatId:Catsid ,title:Title ,CityId:CityId ,descrtiption:Description ,DisId:DisId ,priceFrom: priceFrom,priceTo: priceTo,SubCatId:SubCatsId ,Images:Images ,CityName:CityName,DisName:DisName),
+            child: UserOrderupdate(id: widget.id,),
             //BigListViewWidgetfloat(),
           );
-        });
-  }
-  void onButtonPressedimages(context) {
-    showModalBottomSheet(
-
-        shape: RoundedRectangleBorder(
-          borderRadius: new BorderRadius.only(
-              topLeft: const Radius.circular(22.0),
-              topRight: const Radius.circular(22.0)),
-        ),
-        context: context,
-        isScrollControlled: true,
-        builder: (builder) {
-          return Directionality(
-              textDirection: TextDirection.rtl,
-              child:FractionallySizedBox(
-            heightFactor: 0.50,
-            child:StatefulBuilder(// You need this, notice the parameters below:
-              builder: (BuildContext context, StateSetter setState) {
-
-                return Container(
-                  height: MediaQuery.of(context).size.height*0.30,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: img.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      print("${img[index]['images']}");
-                      return  Container(
-                        height: MediaQuery.of(context).size.width*0.45,
-                        width: MediaQuery.of(context).size.width*0.40,
-                        margin: EdgeInsets.only(left: 10,right: 10),child: Image.network(
-                        "${img[index]['images']}",
-                        //color: color1,
-
-                      ),);
-                    },
-                  ),
-                );
-              }),
-
-
-            //BigListViewWidgetfloat(),
-          ));
         });
   }
   @override
@@ -115,15 +71,15 @@ class order_detailsState extends State<order_details>{
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(
-    body: Directionality(
-      textDirection: TextDirection.rtl,
-      child:
-      //Stack(children: [
+      body: Directionality(
+        textDirection: TextDirection.rtl,
+        child:
+        //Stack(children: [
 
-      (C == null)?Center(
-          child: CircularProgressIndicator(
-            valueColor: new AlwaysStoppedAnimation<Color>(color1),
-          )):Container(child:SingleChildScrollView(scrollDirection: Axis.vertical,child:Container(child: Column(children: [
+        (C == null)?Center(
+            child: CircularProgressIndicator(
+              valueColor: new AlwaysStoppedAnimation<Color>(color1),
+            )):Container(child:SingleChildScrollView(scrollDirection: Axis.vertical,child:Container(child: Column(children: [
           Stack(children: [
             Container(height:size.height*0.20,decoration: BoxDecoration(
               color: color1,
@@ -211,7 +167,7 @@ class order_detailsState extends State<order_details>{
                             color: color1,
                             //borderRadius: BorderRadius.all(Radius.circular(100.0)),
                             image: DecorationImage(
-                              image: NetworkImage("${C['order']['images'][0]['images']}"),
+                              image: NetworkImage("${C['offer']['images'][0]['images']}"),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -222,9 +178,9 @@ class order_detailsState extends State<order_details>{
                   ),),
                   Expanded(flex:1,child: InkWell(
                     onTap: (){
+                      onButtonPressedimages(context);
                       //getImageFiles();
                       //getImage();
-                      onButtonPressedimages(context);
                     },
                     child: Container(margin: EdgeInsets.only(right: 1),child: DottedBorder(
                       color: color1,
@@ -292,7 +248,7 @@ class order_detailsState extends State<order_details>{
                 Container(
                   width: 300,
                   child: Text(
-                    "${C['order']['title']}",
+                    "${C['offer']['title']}",
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                     textAlign:TextAlign.right,
@@ -302,7 +258,7 @@ class order_detailsState extends State<order_details>{
                 Container(
                   width: 300,
                   child: Text(
-                    "${C['order']['description']}",
+                    "${C['offer']['description']}",
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                     textAlign:TextAlign.right,
@@ -320,7 +276,7 @@ class order_detailsState extends State<order_details>{
                         borderRadius: BorderRadius.all(Radius.circular(100)),
                         image: DecorationImage(
                           image: NetworkImage(
-                              "https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                              "$imageProfile"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -328,7 +284,7 @@ class order_detailsState extends State<order_details>{
                     SizedBox(width: size.width*0.02,),
                     Column(children: [
                       Row(children: [ Text(
-                        'وسيم خالد',
+                        '$username',
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'jana',
@@ -356,13 +312,13 @@ class order_detailsState extends State<order_details>{
                   Spacer(),
                   Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
                     onTap: (){
-                      onButtonPressedfloat(context,img,C['order']['title'],C['order']['description'],C['order']['category']['id'],C['order']['sub_category']['id'],C['order']['city']['id'],C['order']['district']['id'],C['order']['price_from'],C['order']['price_to'],C['order']['city']['title'],C['order']['district']['title']);
+                      //onButtonPressedfloat(context);
                       // print("Container clicked");
-                      // Navigator.push(
-                      //     context,
-                      //     MaterialPageRoute(
-                      //       builder: (context) => send_your_order(),
-                      //     ));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditOrder(id:C['offer']['id'],Images:img,title:C['offer']['title'],descrtiption:C['offer']['description'],CatId:C['offer']['category']['id'],SubCatId:C['offer']['sub_category']['id'],CityId:C['offer']['city']['id'],DisId:C['offer']['district']['id'],price:C['offer']['price'],CityName:C['offer']['city']['title'],DisName:C['offer']['district']['title'],SubCatName:C['offer']['sub_category']['title'] ,),
+                          ));
                       //Navigator.pushNamed(context, "NewOrder2");
                     },
                     child:Container(width:size.width*0.35,padding: EdgeInsets.only(left: 8,right:8,top: 8,bottom: 8),
@@ -427,7 +383,7 @@ class order_detailsState extends State<order_details>{
                       fontWeight: FontWeight.bold,
                       fontFamily: 'jana'
                   )),
-              Text("${C['order']['price_from']} \$ - ${C['order']['price_to']} \$",
+              Text("${C['offer']['price']} \$",
                   style: new TextStyle(
                       fontSize: size.width*0.04,
                       color:  Colors.green,
@@ -454,7 +410,7 @@ class order_detailsState extends State<order_details>{
 
             ],),
           ],),),
-         // SizedBox(height: size.height*0.02,),
+          // SizedBox(height: size.height*0.02,),
           Container(
               margin: EdgeInsets.only(left: 20,right: 20),
               height: size.height*0.07,
@@ -471,15 +427,15 @@ class order_detailsState extends State<order_details>{
                 children: <Widget>[
 
                   Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children: [
-                GestureDetector(onTap: (){
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => all_offers(),
-                      ));
-                },child:
+                    GestureDetector(onTap: (){
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => all_offers(),
+                          ));
+                    },child:
                     Text("جميع العروض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: color1,fontFamily: 'Jana'),),
-                  ),
+                    ),
                     Text("عروض جديدة",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
 
                     Text("الأعلى تقيماً",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
@@ -494,115 +450,115 @@ class order_detailsState extends State<order_details>{
                 ],
               )),
           (SS.isEmpty)?Container(): ListView.builder(
-           shrinkWrap: true,
-          //scrollDirection: Axis.horizontal,
-             controller: _scrollController,
+              shrinkWrap: true,
+              //scrollDirection: Axis.horizontal,
+              controller: _scrollController,
               itemCount: SS.length,
               itemBuilder: (BuildContext context, int index){
-               return Container(
-                   margin: EdgeInsets.only(left: 20,right: 20),
-                   height: size.height*0.16,
-                   decoration: BoxDecoration(
-                     color: Colors.white,
-                     borderRadius: BorderRadius.only(
-                         topLeft: Radius.circular(5),
-                         topRight: Radius.circular(5),
-                         bottomLeft: Radius.circular(5),
-                         bottomRight: Radius.circular(5)
-                     ),
-                   ),
-                   child: Column(
-                     children: <Widget>[
-                       Expanded(flex: 2,child:Container(margin:EdgeInsets.only(left: 20,right: 20),child: Row(children: [
-                         Row(children: [
-                           Container(
-                             //margin: EdgeInsets.all(5),
-                             width: size.width*0.10,
-                             height: size.width*0.10,
-                             decoration: BoxDecoration(
-                               color: Colors.white,
-                               borderRadius: BorderRadius.all(Radius.circular(100)),
-                               image: DecorationImage(
-                                 image: NetworkImage(
-                                     "$imageProfile"),
-                                 fit: BoxFit.cover,
-                               ),
-                             ),
-                           ),
-                           SizedBox(width: size.width*0.02,),
-                           Column(children: [
-                             Row(children: [ Text(
-                               '$username',
-                               style: TextStyle(
-                                 color: Colors.black,
-                                 fontFamily: 'jana',
-                                 fontWeight: FontWeight.bold,
-                                 fontSize: size.width*0.035,
-                               ),
-                             ),
-                               SizedBox(width: size.width*0.02,),
-                               Icon(Icons.alarm_add,color: Colors.grey,size: size.width*0.03,),
-                               SizedBox(width: size.width*0.005,),
-                               Text(
-                                 '${SS[index]['created_at']}',
-                                 style: TextStyle(
-                                   color: Colors.grey,
-                                   fontFamily: 'jana',
-                                   fontWeight: FontWeight.bold,
-                                   fontSize: size.width*0.025,
-                                 ),
-                               ),
-                             ],),
-                             Row(children: [
-                               StarRating(
-                                 color: Colors.yellow,
-                                 starCount: 5,
-                                 rating: 4.0,
-                                 size: 14,
-                               ),
-                               SizedBox(width: size.width*0.02,),
-                               Text(
-                                 '${SS[index]['price']} \$',
-                                 style: TextStyle(
-                                   color: Colors.green,
-                                   fontFamily: 'jana',
-                                   fontWeight: FontWeight.bold,
-                                   fontSize: size.width*0.035,
-                                 ),
-                               ),
-                             ],),
-                           ],)
-                         ],),
-                         Spacer(),
-                         Container(
-                           width: size.width*0.075,
-                           height: size.width*0.07,
-                           decoration: BoxDecoration(
-                             color: Colors.grey[300],
-                             borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                return Container(
+                    margin: EdgeInsets.only(left: 20,right: 20),
+                    height: size.height*0.16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(5),
+                          topRight: Radius.circular(5),
+                          bottomLeft: Radius.circular(5),
+                          bottomRight: Radius.circular(5)
+                      ),
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Expanded(flex: 2,child:Container(margin:EdgeInsets.only(left: 20,right: 20),child: Row(children: [
+                          Row(children: [
+                            Container(
+                              //margin: EdgeInsets.all(5),
+                              width: size.width*0.10,
+                              height: size.width*0.10,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.all(Radius.circular(100)),
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                      "https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: size.width*0.02,),
+                            Column(children: [
+                              Row(children: [ Text(
+                                'وسيم خالد',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'jana',
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: size.width*0.035,
+                                ),
+                              ),
+                                SizedBox(width: size.width*0.02,),
+                                Icon(Icons.alarm_add,color: Colors.grey,size: size.width*0.03,),
+                                SizedBox(width: size.width*0.005,),
+                                Text(
+                                  '${SS[index]['created_at']}',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'jana',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: size.width*0.025,
+                                  ),
+                                ),
+                              ],),
+                              Row(children: [
+                                StarRating(
+                                  color: Colors.yellow,
+                                  starCount: 5,
+                                  rating: 4.0,
+                                  size: 14,
+                                ),
+                                SizedBox(width: size.width*0.02,),
+                                Text(
+                                  '${SS[index]['price']} \$',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontFamily: 'jana',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: size.width*0.035,
+                                  ),
+                                ),
+                              ],),
+                            ],)
+                          ],),
+                          Spacer(),
+                          Container(
+                            width: size.width*0.075,
+                            height: size.width*0.07,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.all(Radius.circular(5.0)),
 
-                           ),child: Center(child:
-                         Icon(Icons.chat,color: Colors.grey,size: size.width*0.05,),
-                         ),
-                         ),
-                       ],),),),
-                       SizedBox(height: size.height*0.01,),
-                       Expanded(flex: 2,child: Container(
-                         margin:EdgeInsets.only(left: 20,right: 20),
-                         width: size.width,
-                         child: Text(
-                           "${SS[index]['description']}",
-                           overflow: TextOverflow.ellipsis,
-                           maxLines: 3,
-                           textAlign:TextAlign.right,
-                           style: TextStyle(fontFamily: 'jana',fontSize: size.width*0.03,fontWeight: FontWeight.bold,color: Colors.black),
-                         ),
-                       ),),
+                            ),child: Center(child:
+                          Icon(Icons.chat,color: Colors.grey,size: size.width*0.05,),
+                          ),
+                          ),
+                        ],),),),
+                        SizedBox(height: size.height*0.01,),
+                        Expanded(flex: 2,child: Container(
+                          margin:EdgeInsets.only(left: 20,right: 20),
+                          width: size.width,
+                          child: Text(
+                            "${SS[index]['description']}",
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 3,
+                            textAlign:TextAlign.right,
+                            style: TextStyle(fontFamily: 'jana',fontSize: size.width*0.03,fontWeight: FontWeight.bold,color: Colors.black),
+                          ),
+                        ),),
 
-                       //SizedBox(height: size.height*0.01,),
+                        //SizedBox(height: size.height*0.01,),
 
-                     ],
-                   ));
+                      ],
+                    ));
               }),
 
 
@@ -698,80 +654,75 @@ class order_detailsState extends State<order_details>{
         //     ),
         //   ),),
 
-      //],),
-    ),
+        //],),
+      ),
 
 
 
 
     );
   }
+  void onButtonPressedimages(context) {
+    showModalBottomSheet(
+
+        shape: RoundedRectangleBorder(
+          borderRadius: new BorderRadius.only(
+              topLeft: const Radius.circular(22.0),
+              topRight: const Radius.circular(22.0)),
+        ),
+        context: context,
+        isScrollControlled: true,
+        builder: (builder) {
+          return Directionality(
+              textDirection: TextDirection.rtl,
+              child:FractionallySizedBox(
+                heightFactor: 0.50,
+                child:StatefulBuilder(// You need this, notice the parameters below:
+                    builder: (BuildContext context, StateSetter setState) {
+
+                      return Container(
+                        height: MediaQuery.of(context).size.height*0.30,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: img.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            print("${img[index]['images']}");
+                            return  Container(
+                              height: MediaQuery.of(context).size.width*0.45,
+                              width: MediaQuery.of(context).size.width*0.40,
+                              margin: EdgeInsets.only(left: 10,right: 10),child: Image.network(
+                              "${img[index]['images']}",
+                              //color: color1,
+
+                            ),);
+                          },
+                        ),
+                      );
+                    }),
+
+
+                //BigListViewWidgetfloat(),
+              ));
+        });
+  }
   void getOrder() async {
     SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
-   // String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdXNlclwvbG9naW4iLCJpYXQiOjE2MDkzMTcxNDQsImV4cCI6MTYwOTU3NjM0NCwibmJmIjoxNjA5MzE3MTQ0LCJqdGkiOiJ2anZuZThmZFpDTkRwTmZoIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.9n49oOiEnMVsebinIqqdtbj0hP70ziu1y9lE6C9SjY8';
-    http.Response response = await http.get('https://amer.jit.sa/api/user/order/show/${widget.id}',headers: { HttpHeaders.authorizationHeader: T,"Accept":"application/json"},);
+    //String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdmVuZG9yXC9sb2dpbiIsImlhdCI6MTYwOTQxODk2NywiZXhwIjoxNjA5Njc4MTY3LCJuYmYiOjE2MDk0MTg5NjcsImp0aSI6Ik9pbjNXMEFCZVZDb1ZDWGsiLCJzdWIiOjMsInBydiI6IjkyM2E3Mzc1YjY1NmNhNWJiOWE3MjE2MjNmZTU5ZWI1ZjQ1MWYzZTkifQ.LLnnWP0iST--uLSBoS7jmAB3Zc3LnSsHg_FkZIUIwcI';
+    http.Response response = await http.get('https://amer.jit.sa/api/vendor/offer/show/${widget.id}',headers: { HttpHeaders.authorizationHeader: T,"Accept":"application/json"},);
     Map map = json.decode(response.body);
     print(map);
     if(response.statusCode == 200){
       setState(() {
         C = map['data'];
-        SS = map['data']['order']['offers'];
-        img = map['data']['order']['images'];
+        SS = map['data']['offer']['buy_requests'];
+        img = map['data']['offer']['images'];
         //City = map['data']['cities'];
-
       });
-      //List imagesss = map['data']['order']['images'];
-      //print("images is $imagesss");
-
-     // print(imagesss);
     }
 
 
-  }
-  Future<bool> _onImagePress() {
-
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-              content:Expanded(flex:2,child: img.isEmpty
-                  ? Text('')
-                  :Container(
-                height: 100.0,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: img.length,
-                  itemBuilder: (BuildContext context, int index){
-                    return Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: color1,
-                       // borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                        image: DecorationImage(
-                          image: NetworkImage("${img[index]['images']}"),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-
-                    );
-                  },
-                ),
-              ),),
-
-              // actions: <Widget>[
-              //   FlatButton(
-              //     child: Text("حفظ",style: TextStyle(color: Colors.deepPurple),),
-              //     onPressed: () async {
-              //     },
-              //   ),
-              //
-              // ]
-
-          );
-        }
-    );
   }
   void getAPI() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
@@ -781,6 +732,7 @@ class order_detailsState extends State<order_details>{
     print(map);
     print(token);
     setState(() {
+     // Profile = map['data'];
       username = map['data']['username'];
       imageProfile = map['data']['image'];
     });

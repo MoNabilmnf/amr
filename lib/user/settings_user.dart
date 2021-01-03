@@ -1,13 +1,17 @@
 import 'dart:io';
 
+import 'package:amr/APIs/Api.dart';
 import 'package:amr/user/messages_user.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amr/Screens/ChatScreen.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../BNBCustompain.dart';
+import '../Global.dart';
 import 'ForgotPass_user.dart';
 import 'Home_user.dart';
 import 'discover_user.dart';
@@ -959,7 +963,7 @@ class settings_userState extends State<settings_user>{
           GestureDetector(
             onTap: (){
               print("Container clicked");
-              Navigator.pushNamed(context, "Editpassword");
+              Navigator.pushNamed(context, "ForgotPass_user");
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -1058,8 +1062,11 @@ class settings_userState extends State<settings_user>{
             ],),),),
           SizedBox(height: 8,),
           GestureDetector(
-            onTap: (){
-              print("Container clicked");
+            onTap: () async {
+              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+              sharedPrefs.remove('UserType');
+              //print("Container clicked");
+              print(sharedPrefs.getString('UserType'));
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -1072,13 +1079,34 @@ class settings_userState extends State<settings_user>{
           Divider(height: 2,),
           SizedBox(height: 8,),
           GestureDetector(
-            onTap: (){
+            onTap: () async {
+              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
               print("Container clicked");
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Login_user(),
-                  ));
+
+              if(user_type == 'مشتري'){
+                String Res = await Logout('https://amer.jit.sa/api/user/logout');
+                if(Res == "success"){
+                  sharedPrefs.remove('UserType');
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Login_user(),
+                      ));
+                }
+
+              }else{
+                String Res = await Logout('https://amer.jit.sa/api/vendor/logout');
+                if(Res == "success"){
+                  sharedPrefs.remove('UserType');
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Login_user(),
+                      ));
+                }
+
+              }
+
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 10,),
@@ -1351,6 +1379,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
       ),
     );
   }
+
 }
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');

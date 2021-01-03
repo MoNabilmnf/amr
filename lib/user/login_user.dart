@@ -1,5 +1,8 @@
 import 'dart:ui';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+import 'package:amr/APIs/Api.dart';
 import 'package:amr/Screens/ForgotPass.dart';
 import 'package:amr/Screens/Home.dart';
 import 'package:amr/user/ForgotPass_user.dart';
@@ -8,6 +11,7 @@ import 'package:amr/user/Registration_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../BNBCustompain.dart';
 import '../Global.dart';
@@ -20,6 +24,8 @@ class Login_user extends StatefulWidget {
 
 class Login_userState extends State<Login_user> {
   String _value4,_value3,_value2,_value1;
+  int s = 0;
+  String type = 'مشتري';
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
   final TextEditingController _controller3 = new TextEditingController();
@@ -159,7 +165,51 @@ class Login_userState extends State<Login_user> {
                 ),
               ],
             ),
+            Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+              decoration: BoxDecoration(
+                //color: Colors.grey[300],
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
+                    bottomLeft: Radius.circular(5),
+                    bottomRight: Radius.circular(5)
+                ),
+              ),
+              child: Column(children: [
+                Row(children: [
+                  Text('تسجيل ك',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                ],),
+                DropdownButtonHideUnderline(child:DropdownButton<String>(
+                  value: _value2,
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem<String>(
+                      child: Text('بائع',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                      value: '1',
+                    ),
+                    DropdownMenuItem<String>(
+                      child: Text('مشتري',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                      value: '2',
+                    ),
 
+                  ],
+                  onChanged: (String value) {
+                    setState(() {
+                      print("$value");
+                      _value2 = value;
+                      (value== '2')? s=0:s=1;
+                      (value== '1')?type='بائع':type='مشتري';
+                      // _isChose = true;
+                    });
+                  },
+                  hint: Text("مشتري",textAlign: TextAlign.center,style: TextStyle(
+                      color: Colors.black,fontFamily: 'jana'),),
+
+                ),
+                ),
+              ],),
+
+            ),
             SizedBox(height: size.height*0.03,),
             Container(
               width: size.width*0.50,
@@ -171,17 +221,47 @@ class Login_userState extends State<Login_user> {
                   //side: BorderSide(color: Colors.red)
                 ),
                 color: color1,
-                onPressed: (){
-                  (user_type == 'مشتري')?
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Home_user(),
-                      )):Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeAS(),
-                      ));
+                onPressed: () async {
+                  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+                  var body = {
+                    "phone":"${_controller2.text}",
+                    "password":"${_controller4.text}"
+                  };
+                  if(type == 'مشتري'){
+                    Map m = await AddAPI(body , 'https://amer.jit.sa/api/user/login');
+                    if(m.containsKey("id")){
+                      sharedPrefs.setString('UserId', '${m['id']}');
+                      sharedPrefs.setString('token', '${m['token']}');
+                      sharedPrefs.setString('UserType', 'مشتري');
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Home_user(),
+                          ));
+                    }else if(m.containsKey("message")){
+                      onBackPress(context,"${m['message']}");
+                    }
+
+                  }else{
+                    Map m = await AddAPI(body , 'https://amer.jit.sa/api/vendor/login');
+                    if(m.containsKey("id")){
+                      sharedPrefs.setString('UserId', '${m['id']}');
+                      sharedPrefs.setString('token', '${m['token']}');
+                      sharedPrefs.setString('UserType', 'بائع');
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeAS(),
+                          ));
+                    }else if(m.containsKey("message")){
+                      onBackPress(context,"${m['message']}");
+                    }
+
+                  }
+
+                  setState(() {
+                    user_type =type;
+                  });
                 },
                 child: Row(mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -285,7 +365,9 @@ class Login_userState extends State<Login_user> {
       ),
 
     );
+
   }
+
 }
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');

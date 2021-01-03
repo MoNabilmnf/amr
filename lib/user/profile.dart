@@ -1,11 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'dart:io';
 import '../BNBCustompain.dart';
 import 'details_price.dart';
 
 class profile extends StatefulWidget{
+  profile({this.id});
+  int id;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -16,12 +21,21 @@ class profile extends StatefulWidget{
 class profileState extends State<profile>{
   Color color1 = colorFromHex("f6755f");
   Color color2 = colorFromHex("#FEF2EF");
+  Map ProfileData ;
+  List categories_with_offers = [];
+  List rates = [];
   List name3 = ['قصر فخم للبيع','شقة تمليك','شقة ايجار'];
   List fa = [1,0,0];
   List faa = ['فلل','شقق شمال الرياض'];
   List price = ['10000 رس','2000 رس','260 رس'];
   int x = 0;
   List sh = ['https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/15950985605f1345c0b80a0.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053668285faff42c99718.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053664315faff29f40e0b.jpg'];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getprofileData();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -44,7 +58,7 @@ class profileState extends State<profile>{
          Container(margin:EdgeInsets.only(left: 20),child: Row(children: [
            Expanded(flex:4,child: ListTile(
              title:Row(children: [ Text(
-               'مكتب الهدف العقاري',
+               (ProfileData==null)?"":'${ProfileData['username']}',
                style: TextStyle(
                  color: Colors.black,
                  fontFamily: 'jana',
@@ -61,7 +75,7 @@ class profileState extends State<profile>{
                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
                  image: DecorationImage(
                    image: NetworkImage(
-                       "https://scontent.fcai21-2.fna.fbcdn.net/v/t1.0-9/51708364_2011415955560256_2886851547768029184_n.png?_nc_cat=109&ccb=2&_nc_sid=09cbfe&_nc_ohc=XXH_wJpZkCMAX_2I_lK&_nc_ht=scontent.fcai21-2.fna&oh=e6373af721ca662ba01095d81441fec6&oe=5FD942F4"),
+                       (ProfileData==null)?"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png":"${ProfileData['image']}"),
                    fit: BoxFit.cover,
                  ),
                ),
@@ -88,7 +102,7 @@ class profileState extends State<profile>{
                borderRadius: BorderRadius.all(Radius.circular(5.0)),
 
              ),child: Column(children: [
-             Text("4.9",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.orange,fontFamily: 'Jana'),),
+             Text((ProfileData==null)?"":"${ProfileData['rate']}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.orange,fontFamily: 'Jana'),),
              Row(mainAxisAlignment:MainAxisAlignment.center,children: [
                Icon(Icons.star,color: Colors.orange,size: 12,),
                Icon(Icons.star,color: Colors.orange,size: 12,),
@@ -99,7 +113,7 @@ class profileState extends State<profile>{
          ],),),
          Container(margin:EdgeInsets.only(right: 20),child: Row(children: [
            Text(
-             'مكتب متخصص في عقارات شمال الرياض',
+             (ProfileData==null)?"":'${ProfileData['description']}',
              style: TextStyle(
                color: Colors.grey,
                fontFamily: 'jana',
@@ -243,13 +257,13 @@ class profileState extends State<profile>{
          ],),),
          SizedBox(height: size.height*0.03,),
          (x == 1)?
-         Expanded(child:ListView.builder(
-             shrinkWrap: true,
-             itemCount: 15,
-             itemBuilder: (BuildContext context, int index) {
-               return Card(margin: EdgeInsets.only(left: 20,right: 20,bottom: 10),
-                 child: Container(
-                     height: size.height*0.20,
+         Expanded(child:(rates.isEmpty)?Container():ListView.builder(
+           shrinkWrap: true,
+           itemCount: rates.length,
+           itemBuilder: (BuildContext context, int index) {
+             return Card(margin: EdgeInsets.only(left: 20,right: 20,bottom: 10),
+               child: Container(
+                   height: size.height*0.20,
                    decoration: BoxDecoration(
                      color: Colors.white,
                      borderRadius: BorderRadius.only(
@@ -264,7 +278,7 @@ class profileState extends State<profile>{
                        Container(margin:EdgeInsets.only(left: 20),child: Row(children: [
                          Expanded(flex:4,child: ListTile(
                            title:Row(children: [ Text(
-                             'وسيم خالد',
+                             '${rates[index]['user']['username']}',
                              style: TextStyle(
                                color: Colors.black,
                                fontFamily: 'jana',
@@ -281,7 +295,7 @@ class profileState extends State<profile>{
                                borderRadius: BorderRadius.all(Radius.circular(8.0)),
                                image: DecorationImage(
                                  image: NetworkImage(
-                                     "https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                                     "${rates[index]['user']['image']}"),
                                  fit: BoxFit.cover,
                                ),
                              ),
@@ -290,7 +304,7 @@ class profileState extends State<profile>{
                              StarRating(
                                color: Colors.yellow,
                                starCount: 5,
-                               rating: 4.0,
+                               rating: double.parse("${rates[index]['rate']}"),
                                size: 14,
                              ),
                            ],),
@@ -304,7 +318,7 @@ class profileState extends State<profile>{
                              borderRadius: BorderRadius.all(Radius.circular(5.0)),
 
                            ),child: Column(children: [
-                           Text("4.9",style: TextStyle(fontWeight: FontWeight.bold,fontSize: size.width*0.035,color: Colors.orange,fontFamily: 'Jana'),),
+                           Text("${rates[index]['rate']}",style: TextStyle(fontWeight: FontWeight.bold,fontSize: size.width*0.035,color: Colors.orange,fontFamily: 'Jana'),),
                            Row(mainAxisAlignment:MainAxisAlignment.center,children: [
                              Icon(Icons.star,color: Colors.orange,size: 12,),
                              Icon(Icons.star,color: Colors.orange,size: 12,),
@@ -317,7 +331,7 @@ class profileState extends State<profile>{
                          margin:EdgeInsets.only(left: 20,right: 20),
                          width: size.width,
                          child: Text(
-                           "رفيق شخص مجتهد و أتمنى العمل معه مره أخرى دقيق السعر مناسب و محترم جداً و يستاهل و أنصح أي حد يتعامل معاه",
+                           "${rates[index]['feedback']}",
                            overflow: TextOverflow.ellipsis,
                            maxLines: 3,
                            textAlign:TextAlign.right,
@@ -326,8 +340,8 @@ class profileState extends State<profile>{
                        ),
                      ],
                    )),);
-             },
-           ),)
+           },
+         ),)
          :
            Expanded(child:ListView.builder(
              shrinkWrap: true,
@@ -460,7 +474,22 @@ class profileState extends State<profile>{
      ],),),),
     );
   }
-
+  void getprofileData() async {
+    print("id is ${widget.id}");
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/user/vendor-details/${widget.id}',
+      headers: {HttpHeaders.authorizationHeader: "$token","Accept": "application/json"},
+    );
+    Map map = json.decode(response.body);
+    print(map);
+    setState(() {
+      ProfileData = map['data']['vendor'];
+      categories_with_offers = map['data']['categories_with_offers'];
+      rates = map['data']['rates'];
+    });
+  }
 }
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');
