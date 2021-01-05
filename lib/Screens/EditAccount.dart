@@ -22,11 +22,15 @@ class EditAccount extends StatefulWidget {
 class EditAccountState extends State<EditAccount> {
   final picker = ImagePicker();
   File _image;
+  String profileImage = '';
   Map Profile ;
-  String username ,_value1 ;
+  String _value1 ;
   List<String> City = new List();
   List C = [];
   int cityId;
+  String username='';
+  String CityName = '';
+
   Color color1 = colorFromHex("f6755f");
   final TextEditingController _phone = new TextEditingController();
   final TextEditingController _city = new TextEditingController();
@@ -75,24 +79,25 @@ class EditAccountState extends State<EditAccount> {
 
               ],
             ),
+            //(_image != null)?
             ListTile(
               title:Row(children: [ Icon(Icons.camera_alt,color: Colors.grey,),],),
-              leading: Container(
-                margin: EdgeInsets.all(5),
-                width: 60.0,
-                height: 60.0,
+              leading: _image == null
+                  ?  Container(
+                width: 45.0,
+                height: 45.0,
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  color: color1,
+                  //borderRadius: BorderRadius.all(Radius.circular(100.0)),
                   image: DecorationImage(
-                    image: NetworkImage(
-                      (Profile == null)?'https://www.egyptianamd.org/wp-content/uploads/2019/04/blank-profile-picture-973460_640.png':"${Profile['image']}"),
+                    image: NetworkImage((profileImage.isNotEmpty)?"$profileImage":"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
                     fit: BoxFit.cover,
                   ),
                 ),
-              ),
+              )
+                  :Image.file(_image),
               subtitle: GestureDetector(onTap:() async {
-                 getImageFiles();
+                getImage();
               },child: Text(
                 'تغير صورة الملف الشخصي',
                 style: TextStyle(
@@ -103,6 +108,40 @@ class EditAccountState extends State<EditAccount> {
                 ),
               ),),
             ),
+            // Container(
+            //   width: 50,height: 50,
+            //   child: _image == null
+            //       ? Text('No image selected.')
+            //       : Image.file(_image),
+            // ),
+            //     :ListTile(
+            //   title:Row(children: [ Icon(Icons.camera_alt,color: Colors.grey,),],),
+            //   leading: Container(
+            //     margin: EdgeInsets.all(5),
+            //     width: 60.0,
+            //     height: 60.0,
+            //     decoration: BoxDecoration(
+            //       color: Colors.white,
+            //       borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            //       image: DecorationImage(
+            //         image: NetworkImage((username.isEmpty)?"":"${Profile['image']}"),
+            //         fit: BoxFit.cover,
+            //       ),
+            //     ),
+            //   ),
+            //   subtitle: GestureDetector(onTap:() async {
+            //     getImageFiles();
+            //   },child: Text(
+            //     'تغير صورة الملف الشخصي',
+            //     style: TextStyle(
+            //       color: Colors.grey,
+            //       fontFamily: 'jana',
+            //       fontWeight: FontWeight.bold,
+            //       fontSize: 12,
+            //     ),
+            //   ),),
+            // ),
+
             SizedBox(height: size.height*0.05,),
             Container(margin:EdgeInsets.all(20),child: Column(children: [
               Row(children: [
@@ -132,7 +171,7 @@ class EditAccountState extends State<EditAccount> {
               ],),
               Row(children: [
                 Text(
-                  (Profile == null)?"":'${Profile['username']}',
+                  (username.isEmpty)?"":'$username',
                   style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'jana',
@@ -206,7 +245,7 @@ class EditAccountState extends State<EditAccount> {
               ],),
               Row(children: [
                 Text(
-                  (Profile == null)?"":'${Profile['city']['title']}',
+                  (CityName.isEmpty)?"":'$CityName',
                   style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'jana',
@@ -234,8 +273,10 @@ class EditAccountState extends State<EditAccount> {
                   ),
                 ),child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
                   Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
-                    onTap: (){
+                    onTap: () async {
                       print("Container clicked");
+                      _onLoadingLogin(context);
+
                       //Navigator.pushNamed(context, "NewOrder2");
                     },
                     child:Container(padding: EdgeInsets.only(left: 8,right:8 ,top: 8,bottom: 8),
@@ -273,6 +314,12 @@ class EditAccountState extends State<EditAccount> {
                   Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
                     onTap: (){
                       print("Container clicked");
+                      setState(() {
+                        _image = null;
+                        CityName = '';
+                        username = '';
+                        getAPI();
+                      });
                       //Navigator.pushNamed(context, "NewOrder2");
                     },
                     child:Container(padding: EdgeInsets.only(left: 8,right:8 ,top: 8,bottom: 8),
@@ -339,9 +386,22 @@ class EditAccountState extends State<EditAccount> {
     setState(() {
       Profile = map['data'];
       username = map['data']['username'];
+      profileImage =  map['data']['image'];
       cityId = map['data']['city']['id'];
+      CityName = map['data']['city']['title'];
     });
 
+  }
+  Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
+    });
   }
   Future getImageFiles() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
@@ -350,7 +410,7 @@ class EditAccountState extends State<EditAccount> {
       if (pickedFile != null) {
         // ImageFiles.add(File(pickedFile.path));
         _image = File(pickedFile.path);
-        await EditImage(_image,username,cityId);
+       // await EditImage(_image,username,cityId);
       } else {
         print('No image selected.');
       }
@@ -369,9 +429,10 @@ class EditAccountState extends State<EditAccount> {
                     hintColor: Colors.grey
                 ),
                 child:TextFormField(
+                  textDirection: TextDirection.rtl,
                   controller: _phone,
                   cursorColor: Colors.grey,
-                  maxLength: 11,
+                  maxLength: 50,
                   textAlign:TextAlign.center,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
@@ -384,11 +445,15 @@ class EditAccountState extends State<EditAccount> {
                 FlatButton(
                   child: Text("حفظ",style: TextStyle(color: Colors.deepPurple),),
                   onPressed: () async {
-                    String Res = await Addinter(_phone.text,cityId);
-                    if(Res == 'success'){
-                      Navigator.of(context).pop();
-                      getAPI();
-                    }
+                    setState(() {
+                      username = _phone.text;
+                    });
+                    Navigator.of(context).pop();
+                    // String Res = await Addinter(_phone.text,cityId);
+                    // if(Res == 'success'){
+                    //   Navigator.of(context).pop();
+                    //   getAPI();
+                    // }
                     //Navigator.of(context).pop();
                     //Brands.clear();
                     //getAPI('https://dashboard.urate.sa/api/mobile/all-brands?search=${_phone.text}','Brands');
@@ -437,6 +502,8 @@ class EditAccountState extends State<EditAccount> {
                     print("$value");
                     _value1 = value;
                     cityId =C[postion]['id'];
+                    CityName = value;
+                    Navigator.of(context).pop();
                     // _isChose = true;
                   });
                 },
@@ -445,29 +512,53 @@ class EditAccountState extends State<EditAccount> {
 
               ),
               ),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("حفظ",style: TextStyle(color: Colors.deepPurple),),
-                  onPressed: () async {
-                    String Res = await Addinter(username,cityId);
-                    if(Res == 'success'){
-
-                      getAPI();
-                      Navigator.of(context).pop();
-                    }
-                    //Navigator.of(context).pop();
-                    //Brands.clear();
-                    //getAPI('https://dashboard.urate.sa/api/mobile/all-brands?search=${_phone.text}','Brands');
-
-                  },
-                ),
-
-              ]
+              // actions: <Widget>[
+              //   FlatButton(
+              //     child: Text("حفظ",style: TextStyle(color: Colors.deepPurple),),
+              //     onPressed: () async {
+              //       Navigator.of(context).pop();
+              //       // String Res = await Addinter(username,cityId);
+              //       // if(Res == 'success'){
+              //       //
+              //       //   getAPI();
+              //       //   Navigator.of(context).pop();
+              //       // }
+              //       //Navigator.of(context).pop();
+              //       //Brands.clear();
+              //       //getAPI('https://dashboard.urate.sa/api/mobile/all-brands?search=${_phone.text}','Brands');
+              //
+              //     },
+              //   ),
+              //
+              // ]
 
           );
         }
     );
   }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 3), () async {
+      String Res = await EditImage(context,_image,username,cityId);
+      print(Res);
+      if(Res == 'success'){
+        // Navigator.of(context).pop();
+        //getAPI();
+        print(Res);
+      }
+    });
+  }
+
   Addinter(username,city_id) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');

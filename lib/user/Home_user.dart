@@ -49,6 +49,9 @@ class Home_userState extends State<Home_user>{
   List Imagess = [];
   List S = [];
   List C ;
+  String username='';
+  String profileImage = '';
+  Map Profile ;
   List SC = [];
   List Dis = [];
   int CityId ,DicId;
@@ -926,6 +929,7 @@ class Home_userState extends State<Home_user>{
     // TODO: implement initState
     super.initState();
     getIndex();
+    getAPI();
    // getCity();
     //getCat();
   }
@@ -970,7 +974,7 @@ class Home_userState extends State<Home_user>{
                     color: Colors.white,
                     borderRadius: BorderRadius.all(Radius.circular(100.0)),
                     image: DecorationImage(
-                      image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                      image: NetworkImage("$profileImage"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -1017,7 +1021,7 @@ class Home_userState extends State<Home_user>{
             ],),
             SizedBox(height: 10,),
             Row(mainAxisAlignment:MainAxisAlignment.start,children: [
-              Text("أهلا بعودتك سعود",style: TextStyle(color: Colors.white,fontFamily: 'Jana'),),
+              Text("أهلا بعودتك $username",style: TextStyle(color: Colors.white,fontFamily: 'Jana'),),
             ],),
             Row(mainAxisAlignment:MainAxisAlignment.start,children: [
               Text("كل الي تبغاه موجود هنا",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white,fontFamily: 'Jana'),),
@@ -1325,6 +1329,21 @@ class Home_userState extends State<Home_user>{
 
     }
 
+
+  }
+  void getAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get("https://amer.jit.sa/api/user/profile",headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    print(token);
+    setState(() {
+      Profile = map['data'];
+      username = map['data']['username'];
+      profileImage =  map['data']['image'];
+
+    });
 
   }
 

@@ -320,7 +320,7 @@ class order_detailsState extends State<order_details>{
                         borderRadius: BorderRadius.all(Radius.circular(100)),
                         image: DecorationImage(
                           image: NetworkImage(
-                              "https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                              "$imageProfile"),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -328,7 +328,7 @@ class order_detailsState extends State<order_details>{
                     SizedBox(width: size.width*0.02,),
                     Column(children: [
                       Row(children: [ Text(
-                        'وسيم خالد',
+                        '$username',
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'jana',
@@ -342,7 +342,7 @@ class order_detailsState extends State<order_details>{
 
                         SizedBox(width: size.width*0.02,),
                         Text(
-                          'صاحب العرض',
+                          'صاحب الطلب',
                           style: TextStyle(
                             color: Colors.grey,
                             fontFamily: 'jana',
@@ -475,7 +475,7 @@ class order_detailsState extends State<order_details>{
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => all_offers(),
+                        builder: (context) => all_offers(selectedID: C['order']['id'],),
                       ));
                 },child:
                     Text("جميع العروض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: color1,fontFamily: 'Jana'),),
@@ -773,6 +773,7 @@ class order_detailsState extends State<order_details>{
         }
     );
   }
+
   void getAPI() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');

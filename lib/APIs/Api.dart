@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'package:amr/Global.dart';
 import 'package:async/async.dart';
-
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:dio/dio.dart' ;
 import 'package:http/http.dart' as http;
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-Logout(link) async {
-  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+Logout(link) async {  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+
   String token = sharedPrefs.getString('token') ;
   http.Response response = await http.get('$link',headers: { "Accept":"application/json",'Content-type': 'application/json','Authorization':token});
   print(response.body.toString());
@@ -37,7 +40,7 @@ Logout(link) async {
 //   request.fields.addAll(D);
 //   var response = await request.send();
 // }
-EditImage(imageFile,username,cityId) async {
+EditImage(context,imageFile,username,cityId) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   String T = sharedPrefs.getString('token');
   String Res;
@@ -50,7 +53,8 @@ EditImage(imageFile,username,cityId) async {
   // }
   var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
   var length = await imageFile.length();
-  var D = {"username":'$username',"city_id":cityId};
+  var D = {"username":'$username',"city_id":"$cityId"};
+  print("body is $D");
   var uri = Uri.parse((user_type == 'مشتري')?"https://amer.jit.sa/api/user/profile/update":"https://amer.jit.sa/api/vendor/profile/update");
   var request = new http.MultipartRequest("POST", uri);
   var multipartFile = new http.MultipartFile('image', stream, length,
@@ -63,13 +67,22 @@ EditImage(imageFile,username,cityId) async {
   response.stream.transform(utf8.decoder).listen((value) async {
     Map valueMap = json.decode(value);
     print(valueMap.toString());
+
     if(response.statusCode == 200){
+        Navigator.pop(context);
+        onBackPress(context, "${valueMap['data']['message']}");
+
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          Navigator.pop(context);
+        });
       Rsult = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
 
     }else{
       Rsult = valueMap['data'][0].toString();
       Res = valueMap['data'][0].toString();
+      Navigator.pop(context);
+      onBackPress(context, "${valueMap['data'][0]}");
       return valueMap['data'][0].toString();
     }
 
@@ -104,6 +117,7 @@ CreateAccount2(imageFile,_controller,_controller3,_controller2,_controller4,_val
     print(_value1.toString());
     if(response.statusCode == 200){
       Rsult = valueMap['data'][0].toString();
+      Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
 
     }else{
@@ -113,8 +127,8 @@ CreateAccount2(imageFile,_controller,_controller3,_controller2,_controller4,_val
     }
 
   });
-  print("sadsdasadsad------ $Res");
-  return Res.toString();
+  // print("sadsdasadsad------ $Res");
+  // return Res.toString();
 }
 
 
@@ -344,6 +358,74 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
    //String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdmVuZG9yXC9sb2dpbiIsImlhdCI6MTYwOTM1ODc0OSwiZXhwIjoxNjA5NjE3OTQ5LCJuYmYiOjE2MDkzNTg3NDksImp0aSI6Im41TXF5NFRrMlJhWkh3TGkiLCJzdWIiOjMsInBydiI6IjkyM2E3Mzc1YjY1NmNhNWJiOWE3MjE2MjNmZTU5ZWI1ZjQ1MWYzZTkifQ.36kWI2HhZWEu8UsBT6F37O5K1FnHKdf7xCTv8i2TT2k';
   String T = sharedPrefs.getString('token');
   var uri = Uri.parse("https://amer.jit.sa/api/vendor/offer/store");
+  var request = new http.MultipartRequest("POST", uri);
+  request.headers.addAll(
+      {HttpHeaders.authorizationHeader: T, "Accept": "application/json","Content-Type":"application/json"});
+  request.fields.addAll(D);
+
+  request.files.addAll(Demo);
+  var response = await request.send();
+  if (response.statusCode == 200) {
+    print("Image Uploaded");
+    return 'Success';
+  } else {
+    print("Upload Failed");
+  }
+  response.stream.transform(utf8.decoder).listen((value) async {
+    Map valueMap = json.decode(value);
+    // print(valueMap.toString());
+    // print(_value1.toString());
+    if (response.statusCode == 200) {
+      Rsult = valueMap['data'][0].toString();
+      return 'Success';
+    } else {
+      Rsult = valueMap['data'][0].toString();
+      onBackPress(context, "${valueMap}");
+      //Res = valueMap['data'][0].toString();
+      return valueMap['data'][0].toString();
+    }
+  });
+  // response.stream.transform(utf8.decoder).listen((value) {
+  //   onBackPress(context,"$value");
+  //   print(value);
+  // });
+}
+CreateOrderTest(List images, context,category_id,sub_category_id,title,description,city_id,district_id,price_from,price_to) async {
+  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+  //String T = sharedPrefs.getString('token');
+  print(images.toString());
+  List<http.MultipartFile> Demo = new List<http.MultipartFile>();
+  // var stream = new http.ByteStream(DelegatingStream.typed(images[0].openRead()));
+  // var length = await images[0].length();
+  // var multipartFile = new http.MultipartFile('image', stream, length,
+  //     filename: basename(images[0].path));
+  List<File> files = [];
+  for (Asset asset in images) {
+    final filePath =
+    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+    files.add(File(filePath));
+  }
+  for (int i = 0; i < files.length; i++) {
+    var stream = new http.ByteStream(
+        DelegatingStream.typed(files[i].openRead()));
+    var length = await files[i].length();
+    var multipartFile = new http.MultipartFile('images[$i]', stream, length,
+        filename: basename(files[i].path));
+    Demo.add(multipartFile);
+  }
+  //print("888888 $multipartFile");
+  print("88888844 $Demo");
+  var D = {"category_id": '$category_id', "sub_category_id": '$sub_category_id', "title": '$title',
+    "description": "$description",
+    "city_id": "$city_id",
+    "district_id": "$district_id",
+    "price_from": "$price_from",
+    "price_to": "$price_to"
+    //"images":images
+  };
+  // String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdXNlclwvbG9naW4iLCJpYXQiOjE2MDkzNDAzOTEsImV4cCI6MTYwOTU5OTU5MSwibmJmIjoxNjA5MzQwMzkxLCJqdGkiOiJyN1EzUmh3b3JOS2pxbjBsIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.j8HCdYpdO7MFJDGcdUInGER8XCoJ2nb_rSjEDpznLuU';
+  String T = sharedPrefs.getString('token');
+  var uri = Uri.parse("https://amer.jit.sa/api/user/order/store");
   var request = new http.MultipartRequest("POST", uri);
   request.headers.addAll(
       {HttpHeaders.authorizationHeader: T, "Accept": "application/json","Content-Type":"application/json"});

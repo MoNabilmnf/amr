@@ -27,6 +27,8 @@ class HomeASState extends State<HomeAS>{
   Color color6 = colorFromHex("##e6faf2");
   Color color7 = colorFromHex("#242a38");
   List C ;
+  String imageProfile ='';
+  String username = '';
   int main = 1;
   List<String> images = ["https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg", "https://www.caa.com/sites/default/files/styles/headshot_500x500/public/speaker-headshots/ParsonsJ_headshot_web.jpg?itok=iu-I0aZJ"];
   @override
@@ -34,6 +36,7 @@ class HomeASState extends State<HomeAS>{
     // TODO: implement initState
     super.initState();
     getIndex();
+    getUserData();
   }
   @override
   Widget build(BuildContext context) {
@@ -75,7 +78,7 @@ class HomeASState extends State<HomeAS>{
                   color: color1,
                   //borderRadius: BorderRadius.all(Radius.circular(100.0)),
                   image: DecorationImage(
-                    image: NetworkImage("https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
+                    image: NetworkImage((imageProfile.isNotEmpty)?"$imageProfile":"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -103,7 +106,7 @@ class HomeASState extends State<HomeAS>{
             ],),
             SizedBox(height: 10,),
             Row(mainAxisAlignment:MainAxisAlignment.start,children: [
-              Text("أهلا بعودتك مكتب الهدف العقاري",style: TextStyle(color: Colors.white,fontFamily: 'Jana'),),
+              Text((username.isNotEmpty)?"أهلا بعودتك $username":"أهلا بعودتك ",style: TextStyle(color: Colors.white,fontFamily: 'Jana'),),
             ],),
             Row(mainAxisAlignment:MainAxisAlignment.start,children: [
               Text("جميع عروضنا هنا",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white,fontFamily: 'Jana'),),
@@ -573,6 +576,25 @@ class HomeASState extends State<HomeAS>{
 
 
     );
+  }
+  void getUserData() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/vendor/profile',
+      headers: {
+        HttpHeaders.authorizationHeader: "$token",
+        "Accept": "application/json"
+      },
+    );
+    Map map = json.decode(response.body);
+    print("user usr $map");
+    print(token);
+    setState(() {
+      // Profile = map['data'];
+      username = map['data']['username'];
+      imageProfile = map['data']['image'];
+    });
   }
   void getIndex() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();

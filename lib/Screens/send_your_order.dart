@@ -1,9 +1,15 @@
 //send_your_order
+import 'dart:io';
+import 'package:dio/dio.dart';
+
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amr/Screens/ChatScreen.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../BNBCustompain.dart';
 import 'Home.dart';
@@ -30,6 +36,8 @@ class send_your_orderState extends State<send_your_order>{
   bool saturday = false;
   bool saturday2 = false;
   List<Asset> images = List<Asset>();
+  List<MultipartFile> multipart = List<MultipartFile>();
+  Asset ss ;
   String _error = 'No Error Dectected';
   @override
   Widget build(BuildContext context) {
@@ -130,6 +138,7 @@ class send_your_orderState extends State<send_your_order>{
               onTap: () async {
                 loadAssets();
                 print("ant");
+
                 //getImageFiles();
                 //getImage();
               },
@@ -183,9 +192,13 @@ class send_your_orderState extends State<send_your_order>{
               height: 100.0,
               child: GridView.count(
                // padding: EdgeInsets.all(10),
-                crossAxisCount: 3,
+                crossAxisCount: images.length,
                 children: List.generate(images.length, (index) {
                   Asset asset = images[index];
+                  setState(() {
+                    ss = asset;
+                  });
+                  print("assists is $asset");
                   return Container(
                     margin: EdgeInsets.only(left: 10),
                     child:AssetThumb(
@@ -239,14 +252,20 @@ class send_your_orderState extends State<send_your_order>{
           ],),
           SizedBox(height: size.height*0.15,),
           Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
-            onTap: (){
+            onTap: () async {
               print("Container clicked");
-              Navigator.pop(context);
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => HomeAS(),
-                  ));
+              // File s = await getImageFileFromAssets("$ss");
+              // print("s");
+              for (int i = 0; i < images.length; i++) {
+                var path = await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
+                multipart.add(await MultipartFile.fromFile(path, filename: 'myfile.jpg'));
+              }
+              // Navigator.pop(context);
+              // Navigator.pushReplacement(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) => HomeAS(),
+              //     ));
               //Navigator.pushNamed(context, "NewOrder2");
             },
             child:Container(width:size.width*0.90,padding: EdgeInsets.only(left: 8,right:8,top: 8,bottom: 8),
@@ -287,6 +306,13 @@ class send_your_orderState extends State<send_your_order>{
 
     );
   }
+  Future<File> getImageFileFromAssets(String path) async {
+    final byteData = await rootBundle.load('assets/$path');
+
+    final file = File('${(await getTemporaryDirectory()).path}/$path');
+    await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    return file;
+  }
   Widget buildGridView() {
     return GridView.count(
       crossAxisCount: 3,
@@ -303,7 +329,6 @@ class send_your_orderState extends State<send_your_order>{
   Future<void> loadAssets() async {
     List<Asset> resultList = List<Asset>();
     String error = 'No Error Dectected';
-
     try {
       resultList = await MultiImagePicker.pickImages(
         maxImages: 300,
