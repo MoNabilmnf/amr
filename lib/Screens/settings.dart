@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:amr/APIs/Api.dart';
 import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amr/Screens/ChatScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../BNBCustompain.dart';
 
 class settings extends StatefulWidget{
@@ -26,6 +29,25 @@ class settingsState extends State<settings>{
   int main = 4;
   bool saturday = false;
   bool saturday2 = false;
+  String imageProfilee='';
+  void getAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    print(token);
+    setState(() {
+      imageProfilee = map['data']['image'];
+    });
+
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAPI();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -56,7 +78,7 @@ class settingsState extends State<settings>{
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(100.0)),
                   image: DecorationImage(
-                    image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                    image: NetworkImage("$imageProfilee"),
                     fit: BoxFit.cover,
                   ),
                 ),

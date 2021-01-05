@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:amr/APIs/Api.dart';
 import 'package:amr/Global.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:amr/user/discover_user.dart';
 import 'package:amr/user/messages_user.dart';
@@ -442,7 +443,7 @@ class UserOrderStat extends State<UserOrder> {
                         style: new TextStyle(
                             fontWeight: FontWeight.bold,
                             fontFamily: "jana",
-                            color: Colors.grey,
+                            color: Colors.black,
                             fontStyle: FontStyle.normal,
                             fontSize: 14.0),
                         decoration: InputDecoration(
@@ -1033,12 +1034,8 @@ class UserOrderStat extends State<UserOrder> {
                             }else if (int.parse(_controller1.text.trim()) > int.parse(_controller2.text.trim())) {
                               onBackPress(context, "المبلغ المبدئي أقل من المبلغ النهائي");
                             } else {
-                              String Res = await CreateOrderTest(imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
-                              if(Res == 'Success'){
-                                Navigator.pop(context);
-                              }else{
-                                print(Res.toString());
-                              }
+                                _onLoadingLogin(context);
+
                             }
                             //print("Container clicked");
                             //Navigator.pop(context);
@@ -1245,6 +1242,40 @@ class UserOrderStat extends State<UserOrder> {
       }
       //City = map['data']['cities'];
     });
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 3), () async {
+      String Res = await CreateOrderTest(imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
+      if(Res == 'Success'){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+            msg: "تم أضافة الطلب",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: color1,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+
+      }else{
+        Navigator.pop(context);
+        print(Res.toString());
+      }
+    });
+
   }
 }
 

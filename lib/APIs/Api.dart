@@ -390,6 +390,72 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
   //   print(value);
   // });
 }
+addOffer(List images, context,order_id,description,price) async {
+  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+  //String T = sharedPrefs.getString('token');
+  print(images.toString());
+  List<http.MultipartFile> Demo = new List<http.MultipartFile>();
+
+  List<File> files = [];
+  for (Asset asset in images) {
+    final filePath =
+    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+    files.add(File(filePath));
+  }
+  for (int i = 0; i < files.length; i++) {
+    var stream = new http.ByteStream(
+        DelegatingStream.typed(files[i].openRead()));
+    var length = await files[i].length();
+    var multipartFile = new http.MultipartFile('images[$i]', stream, length,
+        filename: basename(files[i].path));
+    Demo.add(multipartFile);
+  }
+  //print("888888 $multipartFile");
+  print("88888844 $Demo");
+  var D = {"order_id": '$order_id', "price": '$price',
+    "description": "$description"
+    //"images":images
+  };
+  // String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdXNlclwvbG9naW4iLCJpYXQiOjE2MDkzNDAzOTEsImV4cCI6MTYwOTU5OTU5MSwibmJmIjoxNjA5MzQwMzkxLCJqdGkiOiJyN1EzUmh3b3JOS2pxbjBsIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.j8HCdYpdO7MFJDGcdUInGER8XCoJ2nb_rSjEDpznLuU';
+  String T = sharedPrefs.getString('token');
+  var uri = Uri.parse("https://amer.jit.sa/api/vendor/order/add-offer");
+  var request = new http.MultipartRequest("POST", uri);
+  request.headers.addAll(
+      {HttpHeaders.authorizationHeader: T, "Accept": "application/json","Content-Type":"application/json"});
+  request.fields.addAll(D);
+
+  request.files.addAll(Demo);
+  var response = await request.send();
+  if (response.statusCode == 200) {
+    Navigator.pop(context);
+    onBackPress(context, "تم الارسال بنجاح");
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      Navigator.pop(context);
+      Navigator.pop(context);
+    });
+    print("Image Uploaded");
+    return 'Success';
+  } else {
+    Navigator.pop(context);
+    print("Upload Failed");
+  }
+  response.stream.transform(utf8.decoder).listen((value) async {
+    Map valueMap = json.decode(value);
+    if (response.statusCode == 200) {
+      Rsult = valueMap['data'][0].toString();
+
+      return 'Success';
+    } else {
+      Rsult = valueMap['data'][0].toString();
+      onBackPress(context, "${valueMap}");
+      //Res = valueMap['data'][0].toString();
+      return valueMap['data'][0].toString();
+    }
+  });
+
+}
+
+
 CreateOrderTest(List images, context,category_id,sub_category_id,title,description,city_id,district_id,price_from,price_to) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   //String T = sharedPrefs.getString('token');

@@ -549,6 +549,21 @@ class EditAccountState extends State<EditAccount> {
       },
     );
     new Future.delayed(new Duration(seconds: 3), () async {
+      if(_image == null){
+
+        String Res = await Addinter(username,cityId);
+        if(Res == "success"){
+
+          Navigator.pop(context);
+          onBackPress(context, "تم تحديث البيانات بنجاح");
+          Future.delayed(const Duration(milliseconds: 1000), () {
+            Navigator.pop(context);
+          });
+        }else{
+          Navigator.pop(context);
+          onBackPress(context,"$Res");
+        }
+      }else{
       String Res = await EditImage(context,_image,username,cityId);
       print(Res);
       if(Res == 'success'){
@@ -556,7 +571,9 @@ class EditAccountState extends State<EditAccount> {
         //getAPI();
         print(Res);
       }
+      }
     });
+
   }
 
   Addinter(username,city_id) async {
@@ -570,10 +587,12 @@ class EditAccountState extends State<EditAccount> {
     print(response.body.toString());
     var responsebody = json.decode(response.body);
     if(response.statusCode == 200){
+
+
       return 'success';
     }else{
-      onBackPress(context,"${responsebody}");
-      return 'error';
+
+      return '${responsebody['data']['message']}';
     }
   }
 

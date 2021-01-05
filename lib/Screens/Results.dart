@@ -1,6 +1,10 @@
+import 'package:amr/Global.dart';
+import 'package:amr/Screens/discover.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../BNBCustompain.dart';
 
 class Results extends StatefulWidget{
@@ -12,10 +16,28 @@ class Results extends StatefulWidget{
 
 }
 class ResultState extends State<Results>{
+  List<String> Cats = new List();
+  List<String> City = new List();
+  List S = [];
+  List C = [];
+  int CityId;
+  int CatId;
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
   int groub = 0;
-  Color color1 = colorFromHex("f6755f");
+ // Color color1 = colorFromHex("f6755f");
+  Color colorFromHex(String hexColor) {
+    final hexCode = hexColor.replaceAll('#', '');
+    return Color(int.parse('FF$hexCode', radix: 16));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getCity();
+    getCat();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -115,99 +137,7 @@ class ResultState extends State<Results>{
               ),
             ),),
           ],),
-          Row(children: [
-            Text(
-              'عرض النتائج حسب',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'jana',
-                fontSize: 14,
-              ),
-            ),
-          ],),
-          Row(children: [
-            Theme(
-              data: Theme.of(context).copyWith(
-                unselectedWidgetColor: Colors.white38,
-                //disabledColor: Colors.blue
-              ),
-              child:Radio(
-                  activeColor: Colors.white,
-                  value: 88,
-                  hoverColor: color1,
-                  groupValue: groub,
-                  onChanged: (T) {
-                    //  print(T);
-                    setState(() {
-                      groub = T;
 
-                    });
-                  }),),
-            Text(
-              'اليوم',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'jana',
-                fontSize: 14,
-              ),
-            ),
-
-          ],),
-          Row(children: [
-            Theme(
-              data: Theme.of(context).copyWith(
-                unselectedWidgetColor: Colors.white38,
-                //disabledColor: Colors.blue
-              ),
-              child:Radio(
-                  activeColor: Colors.white,
-                  value: 77,
-                  hoverColor: color1,
-                  groupValue: groub,
-                  onChanged: (T) {
-                    //  print(T);
-                    setState(() {
-                      groub = T;
-
-                    });
-                  }),),
-            Text(
-              'الأحداث',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'jana',
-                fontSize: 14,
-              ),
-            ),
-          ],),
-          Row(children: [
-            Theme(
-              data: Theme.of(context).copyWith(
-                unselectedWidgetColor: Colors.white38,
-                //disabledColor: Colors.blue
-              ),
-              child:Radio(
-                  activeColor: Colors.white,
-                  value: 66,
-                  hoverColor: color1,
-                  groupValue: groub,
-                  onChanged: (T) {
-                    //  print(T);
-                    setState(() {
-                      groub = T;
-
-                    });
-                  }),),
-            Text(
-              'الأقدم',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'jana',
-                fontSize: 14,
-              ),
-            ),
-
-          ],),
           Row(children: [
             Text(
               'التصنيفات',
@@ -219,20 +149,26 @@ class ResultState extends State<Results>{
             ),
           ],),
 
-          Container(
+          (S.isEmpty)?Center(
+              child: CircularProgressIndicator(
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+              )): Container(
             height: 150.0,
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              itemCount: 7,
+              itemCount: S.length,
               itemBuilder: (BuildContext context, int index){
                 return new InkWell(
                   onTap: (){
-
+                    setState(() {
+                      CatId = S[index]['id'];
+                    });
                   },
                   child: Center(child: Container(
                       margin: EdgeInsets.only(left: 10),
                       decoration: BoxDecoration(
+                          border: Border.all(color: (CatId == S[index]['id'])?Colors.white:colorFromHex("f6755f")),
                         color: Colors.white38,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),
@@ -247,7 +183,7 @@ class ResultState extends State<Results>{
 
                           Icon(Icons.location_on_outlined,color: Colors.white,),
                           Text(
-                            'الأراضي',
+                            '${S[index]['title']}',
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'jana',
@@ -274,21 +210,27 @@ class ResultState extends State<Results>{
             ),
           ],),
 
-          Container(
+          (C.isEmpty)?Center(
+              child: CircularProgressIndicator(
+                valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+              )):Container(
             height: 40.0,
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              itemCount: 7,
+              itemCount: C.length,
               itemBuilder: (BuildContext context, int index){
                 return new InkWell(
                   onTap: (){
-
+                        setState(() {
+                          CityId = C[index]['id'];
+                        });
                   },
                   child:  Center(child: Container(
                         width: 60,
                         margin: EdgeInsets.only(left: 10),
                         decoration: BoxDecoration(
+                          border: Border.all(color: (CityId ==C[index]['id'])?Colors.white:colorFromHex("f6755f")),
                           color: Colors.white38,
                           borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(10),
@@ -300,7 +242,7 @@ class ResultState extends State<Results>{
                         child: Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text(
-                              'الرياض',
+                              '${C[index]['title']}',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'jana',
@@ -315,49 +257,7 @@ class ResultState extends State<Results>{
               },
             ),
           ),
-          SizedBox(height: 8,),
-          Container(
-            height: 40.0,
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: 7,
-              itemBuilder: (BuildContext context, int index){
-                return new InkWell(
-                  onTap: (){
 
-                  },
-                  child:  Center(child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white38,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10)
-                          ),
-                        ),
-                        width: 50,
-                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-
-                            Text(
-                              'جده',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'jana',
-                                fontSize: 14,
-                              ),
-                            ),
-
-                          ],
-                        ),
-                      ),)
-                );
-              },
-            ),
-          ),
           SizedBox(height: 20,),
           // new RaisedButton(
           //
@@ -378,6 +278,18 @@ class ResultState extends State<Results>{
           GestureDetector(
             onTap: (){
               print("Container clicked");
+              setState(() {
+                FCatID = CatId.toString();
+                FCityID = CityId.toString();
+                FpriceTo = _controller2.text;
+                FpriceFrom = _controller.text;
+              });
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => discover(),
+                  ));
               //Navigator.pushNamed(context, "Home");
             },
             child:Container(
@@ -403,5 +315,29 @@ class ResultState extends State<Results>{
       ],),),),),
     );
   }
+  void getCat() async {
+    http.Response response = await http.get('https://amer.jit.sa/api/categories',headers: {"Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    setState(() {
+      S = map['data']['categories'];
+      for(int i = 0 ; i <S.length; i++){
+        Cats.add(S[i]['title']);
+      }
+    });
 
+  }
+  void getCity() async {
+    http.Response response = await http.get('https://amer.jit.sa/api/cities',headers: {"Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    setState(() {
+      C = map['data']['cities'];
+      for(int i = 0 ; i <C.length; i++){
+        City.add(C[i]['title']);
+      }
+      //City = map['data']['cities'];
+    });
+
+  }
 }

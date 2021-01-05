@@ -1,7 +1,10 @@
 //send_your_order
 import 'dart:io';
+import 'package:amr/APIs/Api.dart';
 import 'package:dio/dio.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +18,8 @@ import '../BNBCustompain.dart';
 import 'Home.dart';
 
 class send_your_order extends StatefulWidget{
+  send_your_order({this.id});
+  final int id;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -35,10 +40,17 @@ class send_your_orderState extends State<send_your_order>{
   final TextEditingController _controller3 = new TextEditingController();
   bool saturday = false;
   bool saturday2 = false;
+  String imageProfile = '';
   List<Asset> images = List<Asset>();
   List<MultipartFile> multipart = List<MultipartFile>();
   Asset ss ;
   String _error = 'No Error Dectected';
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAPI();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -59,7 +71,7 @@ class send_your_orderState extends State<send_your_order>{
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(100.0)),
                   image: DecorationImage(
-                    image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                    image: NetworkImage("$imageProfile"),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -137,7 +149,7 @@ class send_your_orderState extends State<send_your_order>{
             InkWell(
               onTap: () async {
                 loadAssets();
-                print("ant");
+                //print("ant");
 
                 //getImageFiles();
                 //getImage();
@@ -186,19 +198,19 @@ class send_your_orderState extends State<send_your_order>{
             ),          ],),
           Row(children: [
 
-            Expanded(flex:2,child: images == null
+            Expanded(child: images == null
                 ? Text('')
                 :Container(
               height: 100.0,
               child: GridView.count(
-               // padding: EdgeInsets.all(10),
-                crossAxisCount: images.length,
+                // padding: EdgeInsets.all(10),
+                crossAxisCount: 10,
                 children: List.generate(images.length, (index) {
                   Asset asset = images[index];
-                  setState(() {
-                    ss = asset;
-                  });
-                  print("assists is $asset");
+                  // setState(() {
+                  //   ss = asset;
+                  // });
+                  // print("assists is $asset");
                   return Container(
                     margin: EdgeInsets.only(left: 10),
                     child:AssetThumb(
@@ -253,20 +265,8 @@ class send_your_orderState extends State<send_your_order>{
           SizedBox(height: size.height*0.15,),
           Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
             onTap: () async {
-              print("Container clicked");
-              // File s = await getImageFileFromAssets("$ss");
-              // print("s");
-              for (int i = 0; i < images.length; i++) {
-                var path = await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
-                multipart.add(await MultipartFile.fromFile(path, filename: 'myfile.jpg'));
-              }
-              // Navigator.pop(context);
-              // Navigator.pushReplacement(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (context) => HomeAS(),
-              //     ));
-              //Navigator.pushNamed(context, "NewOrder2");
+              _onLoadingRe(context);
+
             },
             child:Container(width:size.width*0.90,padding: EdgeInsets.only(left: 8,right:8,top: 8,bottom: 8),
               decoration: BoxDecoration(
@@ -306,12 +306,21 @@ class send_your_orderState extends State<send_your_order>{
 
     );
   }
-  Future<File> getImageFileFromAssets(String path) async {
-    final byteData = await rootBundle.load('assets/$path');
-
-    final file = File('${(await getTemporaryDirectory()).path}/$path');
-    await file.writeAsBytes(byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
-    return file;
+  void _onLoadingRe(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 3), () async {
+      await addOffer(images,context,widget.id,_controller3.text,_controller2.text);
+    });
   }
   Widget buildGridView() {
     return GridView.count(
@@ -326,6 +335,18 @@ class send_your_orderState extends State<send_your_order>{
       }),
     );
   }
+  void getAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    print(token);
+    setState(() {
+      imageProfile = map['data']['image'];
+    });
+
+  }
   Future<void> loadAssets() async {
     List<Asset> resultList = List<Asset>();
     String error = 'No Error Dectected';
@@ -336,9 +357,9 @@ class send_your_orderState extends State<send_your_order>{
         selectedAssets: images,
         cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
         materialOptions: MaterialOptions(
-          actionBarColor: "#abcdef",
-          actionBarTitle: "Example App",
-          allViewTitle: "All Photos",
+          actionBarColor: "#f6755f",
+          actionBarTitle: "عامر",
+          allViewTitle: "جميع الصور",
           useDetailsView: false,
           selectCircleStrokeColor: "#000000",
         ),

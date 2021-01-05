@@ -50,6 +50,7 @@ class settings_userState extends State<settings_user>{
   List ic33 = [Icons.home,Icons.directions_car,Icons.accessibility_new_rounded,Icons.shopping_cart,Icons.assignment];
   List sh = ['https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/15950985605f1345c0b80a0.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053668285faff42c99718.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053664315faff29f40e0b.jpg'];
   List groupss=[0,0,0,0,0,0,0,0];
+  String imageProfile='';
   List<String> images = ["https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg", "https://www.caa.com/sites/default/files/styles/headshot_500x500/public/speaker-headshots/ParsonsJ_headshot_web.jpg?itok=iu-I0aZJ"];
   final picker = ImagePicker();
   List<File>  ImageFiles = [];
@@ -883,6 +884,24 @@ class settings_userState extends State<settings_user>{
                   )),)));
         });
   }
+  void getAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    print(token);
+    setState(() {
+      imageProfile = map['data']['image'];
+    });
+
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAPI();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -913,7 +932,7 @@ class settings_userState extends State<settings_user>{
                   color: Colors.white,
                   borderRadius: BorderRadius.all(Radius.circular(100.0)),
                   image: DecorationImage(
-                    image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                    image: NetworkImage("$imageProfile"),
                     fit: BoxFit.cover,
                   ),
                 ),
