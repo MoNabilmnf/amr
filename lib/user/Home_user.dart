@@ -935,6 +935,7 @@ class Home_userState extends State<Home_user>{
   }
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(

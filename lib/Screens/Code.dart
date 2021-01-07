@@ -32,6 +32,7 @@ class CodeState extends State<Code>{
   //Color color1 = colorFromHex("f6755f");
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(
@@ -117,6 +118,7 @@ class CodeState extends State<Code>{
           SizedBox(height: 40,),
           GestureDetector(
             onTap: () async {
+              CheckInternet(context);
               String Res = await AddCode(_pinPutController.text);
               if(Res == 'success'){
                 if(user_type == 'مشتري'){

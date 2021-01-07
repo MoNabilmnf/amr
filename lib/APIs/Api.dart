@@ -82,7 +82,7 @@ EditImage(context,imageFile,username,cityId) async {
       Rsult = valueMap['data'][0].toString();
       Res = valueMap['data'][0].toString();
       Navigator.pop(context);
-      onBackPress(context, "${valueMap['data'][0]}");
+      onBackPress(context, "${valueMap['data']['message']}");
       return valueMap['data'][0].toString();
     }
 
@@ -90,7 +90,7 @@ EditImage(context,imageFile,username,cityId) async {
   print("sadsdasadsad------ $Res");
   return Res.toString();
 }
-CreateAccount2(imageFile,_controller,_controller3,_controller2,_controller4,_value1,category_id,sub_category_id) async {
+CreateAccount2(context,imageFile,_controller,_controller3,_controller2,_controller4,_value1,category_id,sub_category_id) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   String T = sharedPrefs.getString('token');
   String Res;
@@ -110,6 +110,12 @@ CreateAccount2(imageFile,_controller,_controller3,_controller2,_controller4,_val
   request.files.add(multipartFile);
   request.fields.addAll(D);
   var response = await request.send();
+  if (response.statusCode == 200) {
+    print("Image Uploaded");
+    return 'Success';
+  } else {
+    print("Upload Failed");
+  }
   print(response.statusCode);
   response.stream.transform(utf8.decoder).listen((value) async {
     Map valueMap = json.decode(value);
@@ -121,6 +127,7 @@ CreateAccount2(imageFile,_controller,_controller3,_controller2,_controller4,_val
       return valueMap['data'][0].toString();
 
     }else{
+      onBackPress(context, "${valueMap['data']['message']}");
       Rsult = valueMap['data'][0].toString();
       Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
@@ -178,13 +185,18 @@ EditOrder(order_id,List images, context,category_id,sub_category_id,title,descri
   // var length = await images[0].length();
   // var multipartFile = new http.MultipartFile('image', stream, length,
   //     filename: basename(images[0].path));
-
-    for (int i = 0; i < images.length; i++) {
+  List<File> files = [];
+  for (Asset asset in images) {
+    final filePath =
+    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+    files.add(File(filePath));
+  }
+    for (int i = 0; i < files.length; i++) {
       var stream = new http.ByteStream(
-          DelegatingStream.typed(images[i].openRead()));
-      var length = await images[i].length();
+          DelegatingStream.typed(files[i].openRead()));
+      var length = await files[i].length();
       var multipartFile = new http.MultipartFile('images[$i]', stream, length,
-          filename: basename(images[i].path));
+          filename: basename(files[i].path));
       Demo.add(multipartFile);
 
   }
@@ -226,7 +238,7 @@ EditOrder(order_id,List images, context,category_id,sub_category_id,title,descri
       return 'Success';
     } else {
       Rsult = valueMap['data'][0].toString();
-      onBackPress(context, "${valueMap}");
+      onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
     }
@@ -514,7 +526,7 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
       return 'Success';
     } else {
       Rsult = valueMap['data'][0].toString();
-      onBackPress(context, "${valueMap}");
+      onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
     }
@@ -622,7 +634,7 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
       return '$responsebody';
     }
   }
-  CreateAccount(imageFile, _controller, _controller3, _controller2,
+  CreateAccount(context,imageFile, _controller, _controller3, _controller2,
       _controller4, _value1) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
@@ -648,6 +660,13 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
     request.files.add(multipartFile);
     request.fields.addAll(D);
     var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print("Image Uploaded");
+      return 'Success';
+    } else {
+      print("Upload Failed");
+    }
     print(response.statusCode);
     response.stream.transform(utf8.decoder).listen((value) async {
       Map valueMap = json.decode(value);
@@ -657,6 +676,7 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
         Rsult = valueMap['data'][0].toString();
         return valueMap['data'][0].toString();
       } else {
+        onBackPress(context, "${valueMap['data']['message']}");
         Rsult = valueMap['data'][0].toString();
         Res = valueMap['data'][0].toString();
         return valueMap['data'][0].toString();

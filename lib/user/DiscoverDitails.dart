@@ -31,6 +31,7 @@ class DiscoverDitails extends StatefulWidget {
 
 class DiscoverDitailsStat extends State<DiscoverDitails> {
   List more = [];
+  List fa = [0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   @override
   void initState() {
     // TODO: implement initState
@@ -48,7 +49,10 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
               final Size size = MediaQuery.of(context).size;
               return Directionality(
                 textDirection: TextDirection.rtl,
-                child: (more.isEmpty)?Container():Container(
+                child: (more.isEmpty)?Center(
+                    child: CircularProgressIndicator(
+                      valueColor: new AlwaysStoppedAnimation<Color>(color1),
+                    )):Container(
                     padding: EdgeInsets.only(left: 20, right: 20, top: 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -135,18 +139,27 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
                                               Align(
                                                 alignment: Alignment.topLeft,
                                                 child: GestureDetector(
-                                                    onTap: () {
+                                                    onTap: () async {
                                                       print("hghgghghgh");
+                                                      String Res = await addFavorite(more[index]['id']);
+                                                      if(Res != "success"){onBackPress(context,Res);}
                                                       setState(() {
-                                                        //(fa[index] == 1)?fa[index] = 0:fa[index] = 1;
+                                                        (fa[index] == 1)
+                                                            ? fa[index] = 0
+                                                            : fa[index] = 1;
                                                       });
+
                                                     },
                                                     child: Container(
                                                       margin: EdgeInsets.all(5),
-                                                      child: Icon(
-                                                        (more[index]['is_favorite'] == false)?Icons.favorite_border: Icons.favorite,
+                                                      child: (more[index]['is_favorite'] == true || fa[index] == 1)
+                                                          ? Icon(
+                                                        Icons.favorite,
                                                         color: Colors.red,
-                                                        size: size.width * 0.08,
+                                                      )
+                                                          : Icon(
+                                                        Icons.favorite_border,
+                                                        color: Colors.grey,
                                                       ),
                                                     )),
                                               ),
@@ -191,7 +204,21 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
 
     });
   }
-
+  addFavorite(order_id) async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    var body = {
+      "order_id":"$order_id"
+    };
+    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      return 'success';
+    }else{
+      return '${responsebody['data']['message']}';
+    }
+  }
   void getDic(id) async {
     http.Response response = await http.get(
       'https://amer.jit.sa/api/cities/$id',

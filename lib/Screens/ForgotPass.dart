@@ -18,6 +18,9 @@ class ForgotPass extends StatefulWidget {
 
 class ForgotPassState extends State<ForgotPass> {
   int name = 0;
+  int s = 0;
+  String type = 'مشتري';
+  String _value2;
   final TextEditingController _controller = new TextEditingController();
   Color color1 = colorFromHex("f6755f");
   @override
@@ -64,7 +67,7 @@ class ForgotPassState extends State<ForgotPass> {
               ),
               SizedBox(height: size.height*0.03,),
 
-              Text('رقم الجوال (إختياري)',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color:(name == 1)?color1: Colors.grey)),
+              Text('رقم الجوال',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color:(name == 1)?color1: Colors.grey)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -126,7 +129,51 @@ class ForgotPassState extends State<ForgotPass> {
                   // ),
                 ],
               ),
+              Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+                decoration: BoxDecoration(
+                  //color: Colors.grey[300],
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(5),
+                      topRight: Radius.circular(5),
+                      bottomLeft: Radius.circular(5),
+                      bottomRight: Radius.circular(5)
+                  ),
+                ),
+                child: Column(children: [
+                  // Row(children: [
+                  //   Text('تسجيل ك',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                  // ],),
+                  DropdownButtonHideUnderline(child:DropdownButton<String>(
+                    value: _value2,
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem<String>(
+                        child: Text('بائع',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                        value: '1',
+                      ),
+                      DropdownMenuItem<String>(
+                        child: Text('مشتري',style: TextStyle(fontSize: 14.0,fontFamily: 'jana',color: Colors.black)),
+                        value: '2',
+                      ),
 
+                    ],
+                    onChanged: (String value) {
+                      setState(() {
+                        print("$value");
+                        _value2 = value;
+                        (value== '2')? s=0:s=1;
+                        (value== '1')?type='بائع':type='مشتري';
+                        // _isChose = true;
+                      });
+                    },
+                    hint: Text("مشتري",textAlign: TextAlign.center,style: TextStyle(
+                        color: Colors.black,fontFamily: 'jana'),),
+
+                  ),
+                  ),
+                ],),
+
+              ),
                SizedBox(height: size.height*0.03,),
               Container(
                 width: size.width*0.50,
@@ -141,7 +188,7 @@ class ForgotPassState extends State<ForgotPass> {
                   onPressed: () async {
 
 
-                      if(user_type == 'مشتري'){
+                      if(type == 'مشتري'){
                         String Res = await AddPhone(_controller.text,'https://amer.jit.sa/api/user/password/send-reset-code');
 
                         if(Res == "success"){

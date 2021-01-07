@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:amr/Global.dart';
 import 'package:amr/user/DiscoverDitailsVendores.dart';
 import 'package:amr/user/details_price.dart';
 import 'package:amr/user/profile.dart';
@@ -43,7 +44,7 @@ class discover_userState extends State<discover_user> {
   Color color7 = colorFromHex("#242a38");
   List name = ['عقارات', 'سيارات', 'كماليات'];
   List ra = [3.5, 2.5, 4.0];
-  List fa = [1, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+  List fa = [0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   List name_radio22 = ['الرياض', 'القيروان', 'العارض', 'جده', 'مكه'];
   List name2 = ['تميز للسيارات', 'Unique Store', 'الهدف العقاري'];
   List name3 = ['قصر فخم للبيع', 'شقة تمليك', 'شقة ايجار'];
@@ -103,6 +104,7 @@ class discover_userState extends State<discover_user> {
     "https://dubarter.s3-eu-west-1.amazonaws.com/2018/06/large-1577744743291838940.jpg"
   ];
   int main = 2;
+  bool is_favorite = false;
   List groupss = [0, 0, 0, 0, 0, 0, 0, 0];
   String username = '', imageProfile = '';
   String _myActivity, _value;
@@ -1401,6 +1403,7 @@ class discover_userState extends State<discover_user> {
 
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(
@@ -1580,7 +1583,7 @@ class discover_userState extends State<discover_user> {
                                         color: Colors.grey,
                                       ),
                                       onPressed: () {
-                                        Navigator.pushNamed(context, "Results");
+                                        //Navigator.pushNamed(context, "Results");
                                       },
                                     ),
                                   ),
@@ -1879,17 +1882,20 @@ class discover_userState extends State<discover_user> {
                                       Align(
                                         alignment: Alignment.topLeft,
                                         child: GestureDetector(
-                                            onTap: () {
+                                            onTap: () async {
                                               print("hghgghghgh");
+                                              String Res = await addFavorite(featured_offers[index]['id']);
+                                              if(Res != "success"){onBackPress(context,Res);}
                                               setState(() {
                                                 (fa[index] == 1)
                                                     ? fa[index] = 0
                                                     : fa[index] = 1;
                                               });
+
                                             },
                                             child: Container(
                                               margin: EdgeInsets.all(5),
-                                              child: (featured_offers[index]['is_favorite'] == true)
+                                              child: (featured_offers[index]['is_favorite'] == true || fa[index] == 1)
                                                   ? Icon(
                                                       Icons.favorite,
                                                       color: Colors.red,
@@ -2249,6 +2255,21 @@ class discover_userState extends State<discover_user> {
       featured_offers = map['data']['featured_offers'];
       categories_with_offers = map['data']['categories_with_offers'];
     });
+  }
+  addFavorite(order_id) async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    var body = {
+      "order_id":"$order_id"
+    };
+    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      return 'success';
+    }else{
+      return '${responsebody['data']['message']}';
+    }
   }
   void getmore(url) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();

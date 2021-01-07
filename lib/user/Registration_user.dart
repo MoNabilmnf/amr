@@ -53,6 +53,7 @@ class Registration_userState extends State<Registration_user> {
   }
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Directionality(
@@ -510,18 +511,22 @@ class Registration_userState extends State<Registration_user> {
                     else if(_controller2.text.trim().length < 10){
                       onBackPress(context,"صيغة رقم الجوال خطأ");
                     }else{
+                      CheckInternet(context);
                       if(type == "مشتري"){
-                        String Res = await CreateAccount(_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId);
-                        setState(() {
-                          user_type = 'مشتري';
-                        });
-                        SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-                        sharedPrefs.setString('UserType', 'مشتري');
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Code(),
-                            ));
+                        String Res = await CreateAccount(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId);
+                        if(Res == "Success"){
+                          setState(() {
+                            user_type = 'مشتري';
+                          });
+                          SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+                          sharedPrefs.setString('UserType', 'مشتري');
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Code(),
+                              ));
+                        }
+
                       }else{
                         if(CatID == null){
                           onBackPress(context,"أختر الفئة");
@@ -529,17 +534,20 @@ class Registration_userState extends State<Registration_user> {
                           onBackPress(context,"أختر الفئة الفرعية");
                         }else{
                           SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-                          String Res = await CreateAccount2(_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId,CatID,SubCatId);
-                          sharedPrefs.setString('UserType', 'بائع');
-                          sharedPrefs.setString('CatId', '$CatID');
-                          setState(() {
-                            user_type = 'بائع';
-                          });
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Code(),
-                              ));
+                          String Res = await CreateAccount2(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId,CatID,SubCatId);
+                          if(Res == "Success"){
+                            sharedPrefs.setString('UserType', 'بائع');
+                            sharedPrefs.setString('CatId', '$CatID');
+                            setState(() {
+                              user_type = 'بائع';
+                            });
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Code(),
+                                ));
+                          }
+
                         }
 
                       }

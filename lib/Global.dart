@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 String user_type = 'مشتري';
@@ -16,4 +18,15 @@ Future<bool> onBackPress(context,message) {
         );
       }
   );
+}
+Future<void> CheckInternet(context) async {
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      print('connected');
+    }
+  } on SocketException catch (_) {
+    onBackPress(context,"من فضلك تحقق من اتصالك بالانترنت");
+    print('not connected');
+  }
 }

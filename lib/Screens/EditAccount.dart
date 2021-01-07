@@ -43,6 +43,7 @@ class EditAccountState extends State<EditAccount> {
   }
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(
@@ -274,6 +275,7 @@ class EditAccountState extends State<EditAccount> {
                 ),child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,children: [
                   Row(mainAxisAlignment: MainAxisAlignment.center,children: [GestureDetector(
                     onTap: () async {
+                      CheckInternet(context);
                       print("Container clicked");
                       _onLoadingLogin(context);
 

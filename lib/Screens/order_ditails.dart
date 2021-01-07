@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:amr/Global.dart';
 import 'package:amr/Screens/send_your_order.dart';
 import 'package:amr/user/UserOrder.dart';
 import 'package:amr/user/UserOrderupdate.dart';
@@ -112,6 +113,7 @@ class order_detailsState extends State<order_details>{
   }
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     // TODO: implement build
     return Scaffold(

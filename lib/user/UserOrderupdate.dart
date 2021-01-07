@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_stack/image_stack.dart';
 import 'package:amr/BNBCustompain.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserOrderupdate extends StatefulWidget {
@@ -75,7 +76,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
     0, 0
   ];
   bool Ha = false;
-
+  String _error = 'No Error Dectected';
   List<String> Cats = new List();
   List<String> City = new List();
   List<String> SubCat = new List();
@@ -160,6 +161,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
     Icons.shopping_cart,
     Icons.assignment
   ];
+  List<Asset> imagesNew = List<Asset>();
   List sh = [
     'https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/15950985605f1345c0b80a0.jpg',
     'https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053668285faff42c99718.jpg',
@@ -197,6 +199,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
 
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     // TODO: implement build
     return Container(
         child: StatefulBuilder(// You need this, notice the parameters below:
@@ -255,7 +258,8 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                           flex: 1,
                           child: InkWell(
                             onTap: () {
-                              getImageFiles();
+                              loadAssets();
+                              //getImageFiles();
                               //getImage();
                             },
                             child: Container(
@@ -304,59 +308,79 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 2,
-                          child: ImageFiles == null
-                              ? Text('')
-                              : Container(
-                                  height: 100.0,
-                                  child: ListView.builder(
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: ImageFiles.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return new InkWell(
-                                          onTap: () {},
-                                          child: Center(
-                                            child: Container(
-                                              margin: EdgeInsets.only(left: 10),
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius: BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(10),
-                                                    topRight:
-                                                        Radius.circular(10),
-                                                    bottomLeft:
-                                                        Radius.circular(10),
-                                                    bottomRight:
-                                                        Radius.circular(10)),
-                                              ),
-                                              width: 100,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  // Icon(Icons.location_on_outlined,color: Colors.white,),
-                                                  // Text(
-                                                  //   'الأراضي',
-                                                  //   style: TextStyle(
-                                                  //     color: Colors.white,
-                                                  //     fontFamily: 'jana',
-                                                  //     fontSize: 14,
-                                                  //   ),
-                                                  // ),
-
-                                                  Image.file(ImageFiles[index]),
-                                                ],
-                                              ),
-                                            ),
-                                          ));
-                                    },
-                                  ),
+                        Expanded(flex:2,child: imagesNew == null
+                            ? Text('')
+                            :Container(
+                          height: 100.0,
+                          child: GridView.count(
+                            // padding: EdgeInsets.all(10),
+                            crossAxisCount:3,
+                            children: List.generate(imagesNew.length, (index) {
+                              Asset asset = imagesNew[index];
+                              return Container(
+                                margin: EdgeInsets.only(left: 10),
+                                child:AssetThumb(
+                                  asset: asset,
+                                  width: 300,
+                                  height: 300,
                                 ),
-                        ),
+                              );
+                            }),
+                          ),
+                        ),),
+                        // Expanded(
+                        //   flex: 2,
+                        //   child: ImageFiles == null
+                        //       ? Text('')
+                        //       : Container(
+                        //           height: 100.0,
+                        //           child: ListView.builder(
+                        //             shrinkWrap: true,
+                        //             scrollDirection: Axis.horizontal,
+                        //             itemCount: ImageFiles.length,
+                        //             itemBuilder:
+                        //                 (BuildContext context, int index) {
+                        //               return new InkWell(
+                        //                   onTap: () {},
+                        //                   child: Center(
+                        //                     child: Container(
+                        //                       margin: EdgeInsets.only(left: 10),
+                        //                       decoration: BoxDecoration(
+                        //                         color: Colors.grey[300],
+                        //                         borderRadius: BorderRadius.only(
+                        //                             topLeft:
+                        //                                 Radius.circular(10),
+                        //                             topRight:
+                        //                                 Radius.circular(10),
+                        //                             bottomLeft:
+                        //                                 Radius.circular(10),
+                        //                             bottomRight:
+                        //                                 Radius.circular(10)),
+                        //                       ),
+                        //                       width: 100,
+                        //                       child: Column(
+                        //                         mainAxisAlignment:
+                        //                             MainAxisAlignment.center,
+                        //                         children: <Widget>[
+                        //                           // Icon(Icons.location_on_outlined,color: Colors.white,),
+                        //                           // Text(
+                        //                           //   'الأراضي',
+                        //                           //   style: TextStyle(
+                        //                           //     color: Colors.white,
+                        //                           //     fontFamily: 'jana',
+                        //                           //     fontSize: 14,
+                        //                           //   ),
+                        //                           // ),
+                        //
+                        //                           Image.file(ImageFiles[index]),
+                        //                         ],
+                        //                       ),
+                        //                     ),
+                        //                   ));
+                        //             },
+                        //           ),
+                        //         ),
+                        // ),
                       ],
                     ),
                     Row(
@@ -428,7 +452,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                         style: new TextStyle(
                             fontWeight: FontWeight.bold,
                             fontFamily: "jana",
-                            color: Colors.grey,
+                            color: Colors.black,
                             fontStyle: FontStyle.normal,
                             fontSize: 14.0),
                         decoration: InputDecoration(
@@ -692,7 +716,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                         children: [
                           Container(
                             width: size.width * 0.40,
-                            height: size.height * 0.12,
+                           // height: size.height * 0.12,
                             padding: EdgeInsets.only(left: 8, right: 8),
                             decoration: BoxDecoration(
                               color: Colors.grey[300],
@@ -704,15 +728,15 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                             ),
                             child: Column(
                               children: [
-                                Row(
-                                  children: [
-                                    Text('المدينة',
-                                        style: TextStyle(
-                                            fontSize: 12.0,
-                                            fontFamily: 'jana',
-                                            color: Colors.grey)),
-                                  ],
-                                ),
+                                // Row(
+                                //   children: [
+                                //     Text('المدينة',
+                                //         style: TextStyle(
+                                //             fontSize: 12.0,
+                                //             fontFamily: 'jana',
+                                //             color: Colors.grey)),
+                                //   ],
+                                // ),
                                 DropdownButtonHideUnderline(
                                   child: DropdownButton<String>(
                                     value: _value1,
@@ -777,7 +801,7 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                           //     :
                           Container(
                                   width: size.width * 0.40,
-                                  height: size.height * 0.12,
+                                  //height: size.height * 0.12,
                                   padding: EdgeInsets.only(left: 8, right: 8),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[300],
@@ -789,15 +813,15 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                                   ),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Text('الحي',
-                                              style: TextStyle(
-                                                  fontSize: 12.0,
-                                                  fontFamily: 'jana',
-                                                  color: Colors.grey)),
-                                        ],
-                                      ),
+                                      // Row(
+                                      //   children: [
+                                      //     Text('الحي',
+                                      //         style: TextStyle(
+                                      //             fontSize: 12.0,
+                                      //             fontFamily: 'jana',
+                                      //             color: Colors.grey)),
+                                      //   ],
+                                      // ),
                                       DropdownButtonHideUnderline(
                                         child: DropdownButton<String>(
                                           value: _value2,
@@ -960,6 +984,9 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                       children: [
                         GestureDetector(
                           onTap: () async {
+                            // if (imagesNew.isEmpty) {
+                            //   onBackPress(context, "أختر صورة");
+                            // } else
                              if (_controller3.text.isEmpty) {
                               onBackPress(context, "أضف عنوان للطلب");
                             } else if (_controller4.text.isEmpty) {
@@ -975,11 +1002,11 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                               onBackPress(context, "أختر حي");
                             } else if (_controller1.text.isEmpty || _controller2.text.isEmpty) {
                               onBackPress(context, "الميزانية المتاحه فارغه");
-                            }else if (int.parse(_controller1.text.trim()) > int.parse(_controller2.text.trim())) {
-                              onBackPress(context, "المبلغ المبدئي أقل من المبلغ النهائي");
                             } else {
-                               if(ImageFiles.isEmpty){
-                                 String Res = await EditOrder2(widget.id,context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
+                               CheckInternet(context);
+                               if(imagesNew.isEmpty){
+                                 print(_controller1.text);
+                                 String Res = await EditOrder22(widget.id,context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
                                  if(Res == 'Success'){
                                    Navigator.pop(context);
                                    Navigator.pushReplacement(
@@ -988,10 +1015,11 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                                          builder: (context) => order_details(id: widget.id,),
                                        ));
                                  }else{
-                                   print(Res.toString());
+                                   onBackPress(context, "$Res");
+                                   //print(Res.toString());
                                  }
                                }else{
-                                 String Res = await EditOrder(widget.id,ImageFiles, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
+                                 String Res = await EditOrder(widget.id,imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
                                  if(Res == 'Success'){
                                    Navigator.pop(context);
                                    Navigator.pushReplacement(
@@ -1138,6 +1166,66 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
       fa[postion] = 1;
     });
 
+  }
+  EditOrder22(order_id,context,category_id,sub_category_id,title,description,city_id,district_id,price_from,price_to) async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    var D = {"order_id": "$order_id","category_id": '$category_id', "sub_category_id": '$sub_category_id', "title": '$title',
+      "description": "$description",
+      "city_id": "$city_id",
+      "district_id": "$district_id",
+      "price_from": "$price_from",
+      "price_to": "$price_to"
+      //"images":images
+    };
+    http.Response response = await http.post("https://amer.jit.sa/api/user/order/update",body: D,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      //onBackPress(context, '${responsebody['data']['message']}');
+      return 'Success';
+    }else{
+      //onBackPress(context, '${responsebody['data']['message']}');
+      return '${responsebody['data']['message']}';
+    }
+  }
+  Future loadAssets() async {
+    List<Asset> resultList = List<Asset>();
+    String error = 'No Error Dectected';
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 300,
+        enableCamera: true,
+        selectedAssets: imagesNew,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#f6755f",
+          actionBarTitle: "عامر",
+          allViewTitle: "جميع الصور",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#000000",
+        ),
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      imagesNew = resultList;
+
+      _error = error;
+    });
+    return resultList;
+    // for (int i = 0; i < imagess.length; i++) {
+    //   var path = await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
+    //   multipart.add(await MultipartFile.fromFile(path, filename: 'myfile.jpg'));
+    // }
   }
 }
 

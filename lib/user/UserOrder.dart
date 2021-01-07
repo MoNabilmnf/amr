@@ -185,6 +185,7 @@ class UserOrderStat extends State<UserOrder> {
 
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     // TODO: implement build
     return Container(
         child: StatefulBuilder(// You need this, notice the parameters below:
@@ -1034,6 +1035,7 @@ class UserOrderStat extends State<UserOrder> {
                             }else if (int.parse(_controller1.text.trim()) > int.parse(_controller2.text.trim())) {
                               onBackPress(context, "المبلغ المبدئي أقل من المبلغ النهائي");
                             } else {
+                                CheckInternet(context);
                                 _onLoadingLogin(context);
 
                             }
@@ -1255,7 +1257,7 @@ class UserOrderStat extends State<UserOrder> {
         );
       },
     );
-    new Future.delayed(new Duration(seconds: 3), () async {
+    new Future.delayed(new Duration(seconds: 1), () async {
       String Res = await CreateOrderTest(imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
       if(Res == 'Success'){
         Navigator.pop(context);

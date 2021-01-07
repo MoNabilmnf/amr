@@ -222,6 +222,7 @@ class Login_userState extends State<Login_user> {
                 ),
                 color: color1,
                 onPressed: () async {
+                  CheckInternet(context);
                   SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
                   var body = {
                     "phone":"${_controller2.text}",
@@ -318,12 +319,13 @@ class Login_userState extends State<Login_user> {
             SizedBox(height: size.height*0.05,),
             Row(mainAxisAlignment: MainAxisAlignment.center,children: [
               Container(child: GestureDetector(onTap: (){
-                (user_type == 'مشتري')?
+                // (user_type == 'مشتري')?
+                // Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => ForgotPass_user(),
+                //     )):
                 Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ForgotPass_user(),
-                    )):Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ForgotPass(),

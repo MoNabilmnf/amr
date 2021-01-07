@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:amr/Global.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boxicons/flutter_boxicons.dart';
@@ -18,6 +19,7 @@ class ForgotPass_userState extends State<ForgotPass_user> {
   Color color1 = colorFromHex("f6755f");
   @override
   Widget build(BuildContext context) {
+    CheckInternet(context);
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: Directionality(
@@ -104,6 +106,7 @@ class ForgotPass_userState extends State<ForgotPass_user> {
                   ),
                   color: color1,
                   onPressed: (){
+
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
