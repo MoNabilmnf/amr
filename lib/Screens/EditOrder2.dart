@@ -7,6 +7,7 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 
 import '../Global.dart';
 
@@ -14,7 +15,7 @@ class EditOrder2 extends StatefulWidget{
   EditOrder2({this.id,this.Images,this.CatId,this.title,this.description,this.CityName,this.DisName,this.price,this.CityId,this.DicId});
   final int CatId,id,CityId,DicId;
   final String title,description,CityName,DisName,price;
-  final List<File> Images;
+  final List<Asset> Images;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -162,7 +163,7 @@ class EditOrder2State extends State<EditOrder2>{
                               _value1 = value;
                               CityId = C[postion]['id'];
                               DDD.clear();
-                              DicId = 0;
+                             // DicId = 0;
                               getDic(CityId);
                               // _isChose = true;
                             });

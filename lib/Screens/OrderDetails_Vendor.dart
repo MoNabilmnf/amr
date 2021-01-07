@@ -431,7 +431,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => all_offers(),
+                            builder: (context) => all_offers(selectedID: C['offer']['id'],),
                           ));
                     },child:
                     Text("جميع العروض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: color1,fontFamily: 'Jana'),),

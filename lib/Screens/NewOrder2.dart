@@ -7,6 +7,7 @@ import 'package:dropdown_formfield/dropdown_formfield.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 
 import '../Global.dart';
 
@@ -14,7 +15,7 @@ class NewOrder2 extends StatefulWidget{
   NewOrder2({this.Images,this.CatId,this.title,this.description});
   final int CatId;
   final String title,description;
-  final List<File> Images;
+  final List<Asset> Images;
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState

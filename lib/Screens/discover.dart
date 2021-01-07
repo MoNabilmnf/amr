@@ -61,9 +61,17 @@ class discoverState extends State<discover>{
     );
     Map map = json.decode(response.body);
     print(map);
-    setState(() {
-      Offers = map['data']['orders'];
-    });
+    List c = map['data']['orders'];
+    if( c.isEmpty){
+      setState(() {
+        Offers = ['kk'];
+      });
+    }else{
+      setState(() {
+        Offers = map['data']['orders'];
+      });
+    }
+
 
   }
   @override
@@ -238,7 +246,8 @@ class discoverState extends State<discover>{
              (Offers.isEmpty)?Center(
                  child: CircularProgressIndicator(
                    valueColor: new AlwaysStoppedAnimation<Color>(color1),
-                 )):Container(height:300,child:ListView.builder(
+                 )):(Offers.contains("kk"))?Center(
+                 child: Text("لا يوجد بيانات")):Container(height:300,child:ListView.builder(
     shrinkWrap: true,
     itemCount: Offers.length,
     itemBuilder: (BuildContext context, int index) {

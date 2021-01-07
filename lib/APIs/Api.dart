@@ -285,12 +285,18 @@ UpdateOffer(id,List images, context,sub_category_id,title,description,city_id,di
   // var length = await images[0].length();
   // var multipartFile = new http.MultipartFile('image', stream, length,
   //     filename: basename(images[0].path));
-  for (int i = 0; i < images.length; i++) {
+  List<File> files = [];
+  for (Asset asset in images) {
+    final filePath =
+    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+    files.add(File(filePath));
+  }
+  for (int i = 0; i < files.length; i++) {
     var stream = new http.ByteStream(
-        DelegatingStream.typed(images[i].openRead()));
-    var length = await images[i].length();
+        DelegatingStream.typed(files[i].openRead()));
+    var length = await files[i].length();
     var multipartFile = new http.MultipartFile('images[$i]', stream, length,
-        filename: basename(images[i].path));
+        filename: basename(files[i].path));
     Demo.add(multipartFile);
   }
   //print("888888 $multipartFile");
@@ -329,7 +335,7 @@ UpdateOffer(id,List images, context,sub_category_id,title,description,city_id,di
       return 'Success';
     } else {
       Rsult = valueMap['data'][0].toString();
-      onBackPress(context, "${valueMap}");
+      onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
     }
@@ -348,12 +354,18 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
   // var length = await images[0].length();
   // var multipartFile = new http.MultipartFile('image', stream, length,
   //     filename: basename(images[0].path));
-  for (int i = 0; i < images.length; i++) {
+  List<File> files = [];
+  for (Asset asset in images) {
+    final filePath =
+    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+    files.add(File(filePath));
+  }
+  for (int i = 0; i < files.length; i++) {
     var stream = new http.ByteStream(
-        DelegatingStream.typed(images[i].openRead()));
-    var length = await images[i].length();
+        DelegatingStream.typed(files[i].openRead()));
+    var length = await files[i].length();
     var multipartFile = new http.MultipartFile('images[$i]', stream, length,
-        filename: basename(images[i].path));
+        filename: basename(files[i].path));
     Demo.add(multipartFile);
   }
   //print("888888 $multipartFile");
@@ -392,7 +404,7 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
       return 'Success';
     } else {
       Rsult = valueMap['data'][0].toString();
-      onBackPress(context, "${valueMap}");
+      onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
     }

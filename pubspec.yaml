@@ -43,6 +43,7 @@ dependencies:
   shared_preferences: ^0.5.12+4
   path_provider: ^1.6.5
   flutter_absolute_path: ^1.0.6
+  flutter_html: ^1.1.1
   fluttertoast: ^7.1.5
   dio: ^3.0.10
 #  flutter_absolute_path: ^1.0.6

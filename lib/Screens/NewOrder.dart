@@ -10,6 +10,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NewOrder extends StatefulWidget{
@@ -23,6 +24,8 @@ class NewOrder extends StatefulWidget{
 class NewOrderState extends State<NewOrder>{
   int CatID ;
   int SubCatId;
+  String _error = 'No Error Dectected';
+  List<Asset> imagesNew = List<Asset>();
   String _value1;
   List<String> SubCat = new List();
   List<String> Cats = new List();
@@ -33,12 +36,23 @@ class NewOrderState extends State<NewOrder>{
   String _myActivity,_value;
   List<File>  ImageFiles = [];
   String _value4,_value3,_value2;
+  void getAPI() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    Map map = json.decode(response.body);
+    print(map);
+    print(token);
+    getSubCat(map['data']['category']['id']);
+
+
+  }
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getCat();
-    getSubCat();
+    getAPI();
   }
   @override
   Widget build(BuildContext context) {
@@ -276,7 +290,8 @@ class NewOrderState extends State<NewOrder>{
           Row(children: [
             Expanded(flex:1,child: InkWell(
               onTap: (){
-                getImageFiles();
+                loadAssets();
+                //getImageFiles();
                 //getImage();
               },
               child: Container(margin: EdgeInsets.only(right: 1,left: 10),child: DottedBorder(
@@ -321,52 +336,73 @@ class NewOrderState extends State<NewOrder>{
                   ),
                 ),),),
             ),),
-            Expanded(flex:2,child: ImageFiles == null
+            Expanded(flex:2,child: imagesNew == null
                 ? Text('')
                 :Container(
               height: 100.0,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: ImageFiles.length,
-                itemBuilder: (BuildContext context, int index){
-                  return new InkWell(
-                      onTap: (){
+              child: GridView.count(
+                // padding: EdgeInsets.all(10),
+                crossAxisCount:3,
+                children: List.generate(imagesNew.length, (index) {
+                  Asset asset = imagesNew[index];
 
-                      },
-                      child: Center(child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10)
-                          ),
-                        ),
-                        width: 100,
-                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            // Icon(Icons.location_on_outlined,color: Colors.white,),
-                            // Text(
-                            //   'الأراضي',
-                            //   style: TextStyle(
-                            //     color: Colors.white,
-                            //     fontFamily: 'jana',
-                            //     fontSize: 14,
-                            //   ),
-                            // ),
-
-                            Image.file(ImageFiles[index]),
-
-                          ],
-                        ),
-                      ),)
+                  return Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child:AssetThumb(
+                      asset: asset,
+                      width: 300,
+                      height: 300,
+                    ),
                   );
-                },
+                }),
               ),
             ),),
+            // Expanded(flex:2,child: ImageFiles == null
+            //     ? Text('')
+            //     :Container(
+            //   height: 100.0,
+            //   child: ListView.builder(
+            //     shrinkWrap: true,
+            //     scrollDirection: Axis.horizontal,
+            //     itemCount: ImageFiles.length,
+            //     itemBuilder: (BuildContext context, int index){
+            //       return new InkWell(
+            //           onTap: (){
+            //
+            //           },
+            //           child: Center(child: Container(
+            //             margin: EdgeInsets.only(left: 10),
+            //             decoration: BoxDecoration(
+            //               color: Colors.grey[300],
+            //               borderRadius: BorderRadius.only(
+            //                   topLeft: Radius.circular(10),
+            //                   topRight: Radius.circular(10),
+            //                   bottomLeft: Radius.circular(10),
+            //                   bottomRight: Radius.circular(10)
+            //               ),
+            //             ),
+            //             width: 100,
+            //             child: Column(mainAxisAlignment: MainAxisAlignment.center,
+            //               children: <Widget>[
+            //                 // Icon(Icons.location_on_outlined,color: Colors.white,),
+            //                 // Text(
+            //                 //   'الأراضي',
+            //                 //   style: TextStyle(
+            //                 //     color: Colors.white,
+            //                 //     fontFamily: 'jana',
+            //                 //     fontSize: 14,
+            //                 //   ),
+            //                 // ),
+            //
+            //                 Image.file(ImageFiles[index]),
+            //
+            //               ],
+            //             ),
+            //           ),)
+            //       );
+            //     },
+            //   ),
+            // ),),
           ],),
 
           Row(children: [
@@ -424,13 +460,13 @@ class NewOrderState extends State<NewOrder>{
                 onBackPress(context,"أضف وصفا");
               }else if(SubCatId == null){
                 onBackPress(context,"أختر فئة فرعيه");
-              }else if(ImageFiles.isEmpty){
+              }else if(imagesNew.isEmpty){
                 onBackPress(context,"أضف صور");
               }else{
                 Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NewOrder2(title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: ImageFiles,),
+                      builder: (context) => NewOrder2(title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: imagesNew,),
                     ));
                 //Navigator.pushNamed(context, "NewOrder2");
               }
@@ -500,10 +536,10 @@ class NewOrderState extends State<NewOrder>{
       }
     });
   }
-  void getSubCat() async {
+  void getSubCat(id) async {
     SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
    // sharedPrefs.remove('SubCatId');
-    http.Response response = await http.get('https://amer.jit.sa/api/categories/${sharedPrefs.getString('CatId')}',headers: {"Accept":"application/json"},);
+    http.Response response = await http.get('https://amer.jit.sa/api/categories/$id',headers: {"Accept":"application/json"},);
     Map map = json.decode(response.body);
     print(map);
     setState(() {
@@ -514,6 +550,44 @@ class NewOrderState extends State<NewOrder>{
       //City = map['data']['cities'];
     });
 
+  }
+  Future loadAssets() async {
+    List<Asset> resultList = List<Asset>();
+    String error = 'No Error Dectected';
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 300,
+        enableCamera: true,
+        selectedAssets: imagesNew,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#f6755f",
+          actionBarTitle: "عامر",
+          allViewTitle: "جميع الصور",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#000000",
+        ),
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      imagesNew = resultList;
+
+      _error = error;
+    });
+    return resultList;
+    // for (int i = 0; i < imagess.length; i++) {
+    //   var path = await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
+    //   multipart.add(await MultipartFile.fromFile(path, filename: 'myfile.jpg'));
+    // }
   }
   void getCat() async {
     http.Response response = await http.get(

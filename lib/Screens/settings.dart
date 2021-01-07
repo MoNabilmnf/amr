@@ -204,6 +204,7 @@ class settingsState extends State<settings>{
           GestureDetector(
             onTap: (){
               print("Container clicked");
+              Navigator.pushNamed(context, "support");
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -217,6 +218,7 @@ class settingsState extends State<settings>{
           GestureDetector(
             onTap: (){
               print("Container clicked");
+              Navigator.pushNamed(context, "About_Us");
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -228,10 +230,11 @@ class settingsState extends State<settings>{
           SizedBox(height: 8,),
           GestureDetector(
             onTap: () async {
-              print("Container clicked");
-              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-              sharedPrefs.remove('UserType');
-              print(sharedPrefs.getString('UserType'));
+              Navigator.pushNamed(context, "security_and_privacy");
+              // print("Container clicked");
+              // SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+              // sharedPrefs.remove('UserType');
+              // print(sharedPrefs.getString('UserType'));
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),

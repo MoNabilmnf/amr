@@ -1,3 +1,4 @@
+import 'package:amr/Global.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
@@ -25,7 +26,7 @@ class profileState extends State<profile>{
   List categories_with_offers = [];
   List rates = [];
   List name3 = ['قصر فخم للبيع','شقة تمليك','شقة ايجار'];
-  List fa = [1,0,0];
+  List fa = [0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   List faa = ['فلل','شقق شمال الرياض'];
   List price = ['10000 رس','2000 رس','260 رس'];
   int x = 0;
@@ -83,7 +84,7 @@ class profileState extends State<profile>{
              subtitle: Row(children: [
                Icon(Icons.location_on_outlined,color: color1,size: size.width*0.05,),
                Text(
-                 'المملكه العربية السعودية',
+                 '${ProfileData['city']['title']}',
                  style: TextStyle(
                    color: color1,
                    fontFamily: 'jana',
@@ -343,10 +344,11 @@ class profileState extends State<profile>{
            },
          ),)
          :
-           Expanded(child:ListView.builder(
+         (categories_with_offers.isEmpty)?Container():Expanded(child:ListView.builder(
              shrinkWrap: true,
-             itemCount: 2,
+             itemCount: categories_with_offers.length,
              itemBuilder: (BuildContext context, int index) {
+               List offers = categories_with_offers[index]['offers'];
                return  Container(
                      margin: EdgeInsets.only(left: 20,right: 20),
                      height: size.height*0.35,
@@ -363,7 +365,7 @@ class profileState extends State<profile>{
                        children: <Widget>[
                          Container(
                            child: Row(mainAxisAlignment:MainAxisAlignment.start,children: [
-                           Text(faa[index],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
+                           Text(categories_with_offers[index]['title'],style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
                            Spacer(),
 
                            GestureDetector(onTap: (){
@@ -379,7 +381,7 @@ class profileState extends State<profile>{
                            child: ListView.builder(
                              shrinkWrap: true,
                              scrollDirection: Axis.horizontal,
-                             itemCount: 3,
+                             itemCount: offers.length,
                              itemBuilder: (BuildContext context, int index){
                                return new InkWell(
                                  onTap: (){
@@ -388,7 +390,7 @@ class profileState extends State<profile>{
                                    Navigator.push(
                                        context,
                                        MaterialPageRoute(
-                                         builder: (context) => details_price(),
+                                         builder: (context) => details_price(id:offers[index]['id'] ,),
                                        ));
                                  },
                                  child:  Container(
@@ -416,17 +418,38 @@ class profileState extends State<profile>{
                                              color: Colors.white,
                                              borderRadius: BorderRadius.all(Radius.circular(5.0)),
                                              image: DecorationImage(
-                                               image: NetworkImage("${sh[index]}"),
+                                               image: NetworkImage("${offers[index]['image']}"),
                                                fit: BoxFit.cover,
                                              ),
                                            ),
                                          ),
-                                         Align(alignment: Alignment.topLeft,child: GestureDetector(onTap: (){
-                                           print("hghgghghgh");
-                                           setState(() {
-                                             (fa[index] == 1)?fa[index] = 0:fa[index] = 1;
-                                           });
-                                         },child:Container(margin:EdgeInsets.all(size.width*0.015),child: (fa[index] == 1)?Icon(Icons.favorite,color: Colors.red,):Icon(Icons.favorite_border,color: Colors.grey,),)),),
+                                         Align(
+                                           alignment: Alignment.topLeft,
+                                           child: GestureDetector(
+                                               onTap: () async {
+                                                 print("hghgghghgh");
+                                                 String Res = await addFavorite(offers[index]['id']);
+                                                 if(Res != "success"){onBackPress(context,Res);}
+                                                 setState(() {
+                                                   (fa[index] == 1)
+                                                       ? fa[index] = 0
+                                                       : fa[index] = 1;
+                                                 });
+
+                                               },
+                                               child: Container(
+                                                 margin: EdgeInsets.all(5),
+                                                 child: (offers[index]['is_favorite'] == true || fa[index] == 1)
+                                                     ? Icon(
+                                                   Icons.favorite,
+                                                   color: Colors.red,
+                                                 )
+                                                     : Icon(
+                                                   Icons.favorite_border,
+                                                   color: Colors.grey,
+                                                 ),
+                                               )),
+                                         ),
 
 
                                        ],),
@@ -435,7 +458,7 @@ class profileState extends State<profile>{
                                        Row(children: [
                                          Column(mainAxisAlignment:MainAxisAlignment.start,children: [
                                            Text(
-                                             name3[index],
+                                             "${offers[index]['title']}",
                                              style: TextStyle(
                                                  color: Colors.grey,
                                                  fontFamily: 'jana',
@@ -444,7 +467,7 @@ class profileState extends State<profile>{
                                              ),
                                            ),
                                            Text(
-                                             price[index],
+                                             "${offers[index]['price']}",
                                              style: TextStyle(
                                                  color: color1,
                                                  fontFamily: 'jana',
@@ -473,6 +496,21 @@ class profileState extends State<profile>{
 
      ],),),),
     );
+  }
+  addFavorite(order_id) async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String T = sharedPrefs.getString('token');
+    var body = {
+      "order_id":"$order_id"
+    };
+    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      return 'success';
+    }else{
+      return '${responsebody['data']['message']}';
+    }
   }
   void getprofileData() async {
     print("id is ${widget.id}");

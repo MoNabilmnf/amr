@@ -11,6 +11,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EditOrder extends StatefulWidget{
@@ -34,6 +35,8 @@ class EditOrderState extends State<EditOrder>{
   List<String> Cats = new List();
   List S = [];
   List SC = [];
+  String _error = 'No Error Dectected';
+  List<Asset> imagesNew = List<Asset>();
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
   String _myActivity,_value;
@@ -287,7 +290,8 @@ class EditOrderState extends State<EditOrder>{
           Row(children: [
             Expanded(flex:1,child: InkWell(
               onTap: (){
-                getImageFiles();
+                //getImageFiles();
+                loadAssets();
                 //getImage();
               },
               child: Container(margin: EdgeInsets.only(right: 1,left: 10),child: DottedBorder(
@@ -332,50 +336,71 @@ class EditOrderState extends State<EditOrder>{
                   ),
                 ),),),
             ),),
-            Expanded(flex:2,child: ImageFiles == null
+            // Expanded(flex:2,child: ImageFiles == null
+            //     ? Text('')
+            //     :Container(
+            //   height: 100.0,
+            //   child: ListView.builder(
+            //     shrinkWrap: true,
+            //     scrollDirection: Axis.horizontal,
+            //     itemCount: ImageFiles.length,
+            //     itemBuilder: (BuildContext context, int index){
+            //       return new InkWell(
+            //           onTap: (){
+            //
+            //           },
+            //           child: Center(child: Container(
+            //             margin: EdgeInsets.only(left: 10),
+            //             decoration: BoxDecoration(
+            //               color: Colors.grey[300],
+            //               borderRadius: BorderRadius.only(
+            //                   topLeft: Radius.circular(10),
+            //                   topRight: Radius.circular(10),
+            //                   bottomLeft: Radius.circular(10),
+            //                   bottomRight: Radius.circular(10)
+            //               ),
+            //             ),
+            //             width: 100,
+            //             child: Column(mainAxisAlignment: MainAxisAlignment.center,
+            //               children: <Widget>[
+            //                 // Icon(Icons.location_on_outlined,color: Colors.white,),
+            //                 // Text(
+            //                 //   'الأراضي',
+            //                 //   style: TextStyle(
+            //                 //     color: Colors.white,
+            //                 //     fontFamily: 'jana',
+            //                 //     fontSize: 14,
+            //                 //   ),
+            //                 // ),
+            //
+            //                 Image.file(ImageFiles[index]),
+            //
+            //               ],
+            //             ),
+            //           ),)
+            //       );
+            //     },
+            //   ),
+            // ),),
+            Expanded(flex:2,child: imagesNew == null
                 ? Text('')
                 :Container(
               height: 100.0,
-              child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: ImageFiles.length,
-                itemBuilder: (BuildContext context, int index){
-                  return new InkWell(
-                      onTap: (){
+              child: GridView.count(
+                // padding: EdgeInsets.all(10),
+                crossAxisCount:3,
+                children: List.generate(imagesNew.length, (index) {
+                  Asset asset = imagesNew[index];
 
-                      },
-                      child: Center(child: Container(
-                        margin: EdgeInsets.only(left: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10)
-                          ),
-                        ),
-                        width: 100,
-                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            // Icon(Icons.location_on_outlined,color: Colors.white,),
-                            // Text(
-                            //   'الأراضي',
-                            //   style: TextStyle(
-                            //     color: Colors.white,
-                            //     fontFamily: 'jana',
-                            //     fontSize: 14,
-                            //   ),
-                            // ),
-
-                            Image.file(ImageFiles[index]),
-
-                          ],
-                        ),
-                      ),)
+                  return Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child:AssetThumb(
+                      asset: asset,
+                      width: 300,
+                      height: 300,
+                    ),
                   );
-                },
+                }),
               ),
             ),),
           ],),
@@ -435,13 +460,13 @@ class EditOrderState extends State<EditOrder>{
                 onBackPress(context,"أضف وصفا");
               }else if(SubCatId == null){
                 onBackPress(context,"أختر فئة فرعيه");
-              }else if(ImageFiles.isEmpty){
+              }else if(imagesNew.isEmpty){
                 onBackPress(context,"أضف صور");
               }else{
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EditOrder2(id:widget.id,title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: ImageFiles,CityName: widget.CityName,DisName: widget.DisName,price: widget.price,CityId: widget.CityId,DicId: widget.DisId,),
+                      builder: (context) => EditOrder2(id:widget.id,title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: imagesNew,CityName: widget.CityName,DisName: widget.DisName,price: widget.price,CityId: widget.CityId,DicId: widget.DisId,),
                     ));
                 //Navigator.pushNamed(context, "NewOrder2");
               }
@@ -525,6 +550,44 @@ class EditOrderState extends State<EditOrder>{
       //City = map['data']['cities'];
     });
 
+  }
+  Future loadAssets() async {
+    List<Asset> resultList = List<Asset>();
+    String error = 'No Error Dectected';
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 300,
+        enableCamera: true,
+        selectedAssets: imagesNew,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#f6755f",
+          actionBarTitle: "عامر",
+          allViewTitle: "جميع الصور",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#000000",
+        ),
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      imagesNew = resultList;
+
+      _error = error;
+    });
+    return resultList;
+    // for (int i = 0; i < imagess.length; i++) {
+    //   var path = await FlutterAbsolutePath.getAbsolutePath(images[i].identifier);
+    //   multipart.add(await MultipartFile.fromFile(path, filename: 'myfile.jpg'));
+    // }
   }
   void getCat() async {
     http.Response response = await http.get(

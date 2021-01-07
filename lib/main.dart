@@ -8,6 +8,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'Screens/About_Us.dart';
 import 'Screens/CHECK.dart';
 import 'Screens/CHECK2.dart';
 import 'Screens/ChatScreen.dart';
@@ -28,9 +29,11 @@ import 'Screens/login.dart';
 import 'Screens/messages.dart';
 import 'Screens/notification.dart';
 import 'Screens/order_ditails.dart';
+import 'Screens/security-and-privacy.dart';
 import 'Screens/send_your_order.dart';
 import 'Screens/settings.dart';
 import 'Screens/splash.dart';
+import 'Screens/support.dart';
 
 void main() => runApp(
   // DevicePreview(
@@ -71,7 +74,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      //home: send_your_order(),
+      //home: About_Us(),
       home: Splash(),
         routes: <String, WidgetBuilder>{
           "notification": (BuildContext context) => new notification(),
@@ -91,6 +94,9 @@ class MyApp extends StatelessWidget {
           "NextPage1": (BuildContext context) => new NextPage1(),
           "NextPage2": (BuildContext context) => new NextPage2(),
           "NextPage3": (BuildContext context) => new NextPage3(),
+          "support": (BuildContext context) => new support(),
+          "security_and_privacy": (BuildContext context) => new security_and_privacy(),
+          "About_Us": (BuildContext context) => new About_Us(),
           "Registration": (BuildContext context) => new Registration(),
           "Login": (BuildContext context) => new Login(),
           "ForgotPass_user": (BuildContext context) => new ForgotPass(),
