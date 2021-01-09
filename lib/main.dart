@@ -2,6 +2,7 @@ import 'package:amr/Screens/Home.dart';
 import 'package:amr/Screens/Registration.dart';
 import 'package:amr/user/ForgotPass_user.dart';
 import 'package:amr/user/Home_user.dart';
+import 'package:amr/user/Messages.dart';
 import 'package:amr/user/image3_user.dart';
 import 'package:amr/user_type.dart';
 import 'package:device_preview/device_preview.dart';
@@ -74,8 +75,8 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      //home: About_Us(),
-      home: Splash(),
+      home: MessagingWidget(),
+      //home: Splash(),
         routes: <String, WidgetBuilder>{
           "notification": (BuildContext context) => new notification(),
           "Home": (BuildContext context) => new HomeAS(),

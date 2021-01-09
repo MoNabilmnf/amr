@@ -1,4 +1,4 @@
-package com.example.amr;
+package com.amer;
 
 import io.flutter.embedding.android.FlutterActivity;
 

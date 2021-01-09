@@ -466,6 +466,7 @@ class all_offersState extends State<all_offers>{
   void getOffers(id,Key) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
+    print(sharedPrefs.getString('UserType'));
     http.Response response = await http.get(
       (sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/order/offers/$id/$Key': 'https://amer.jit.sa/api/vendor/order/offers/$id/$Key',
       headers: {HttpHeaders.authorizationHeader:"$token","Accept": "application/json"},

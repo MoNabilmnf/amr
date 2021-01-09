@@ -38,7 +38,7 @@ String data = '';
       body: Directionality(
         textDirection: TextDirection.rtl,
         child:Container(
-          padding: EdgeInsets.only(top: size.height*0.04),
+          padding: EdgeInsets.only(top: size.height*0.04,left:10,right: 10 ),
         child: Column(
           children: [
             Row(

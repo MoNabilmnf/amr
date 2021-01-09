@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1092533586458",
+    "project_id": "amer-6dca2",
+    "storage_bucket": "amer-6dca2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092533586458:android:3a33a5fb9a01e8b121dfa3",
+        "android_client_info": {
+          "package_name": "com.amer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1092533586458-1e9qdgqgigs2hlh6c0tb385r2f852dq2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2vgoBs_XkItHYlLA9_MLR1pfjCZPID_w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1092533586458-1e9qdgqgigs2hlh6c0tb385r2f852dq2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1092533586458-oor7jbkjke795ca4ka45a1cpr7ir40pj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.amer"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

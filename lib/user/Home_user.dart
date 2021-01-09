@@ -930,8 +930,7 @@ class Home_userState extends State<Home_user>{
     super.initState();
     getIndex();
     getAPI();
-   // getCity();
-    //getCat();
+
   }
   @override
   Widget build(BuildContext context) {

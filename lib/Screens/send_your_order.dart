@@ -1,7 +1,6 @@
 //send_your_order
 import 'dart:io';
 import 'package:amr/APIs/Api.dart';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -42,7 +41,7 @@ class send_your_orderState extends State<send_your_order>{
   bool saturday2 = false;
   String imageProfile = '';
   List<Asset> images = List<Asset>();
-  List<MultipartFile> multipart = List<MultipartFile>();
+  //List<MultipartFile> multipart = List<MultipartFile>();
   Asset ss ;
   String _error = 'No Error Dectected';
   @override

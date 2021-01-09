@@ -234,6 +234,7 @@ class Login_userState extends State<Login_user> {
                       sharedPrefs.setString('UserId', '${m['id']}');
                       sharedPrefs.setString('token', '${m['token']}');
                       sharedPrefs.setString('UserType', 'مشتري');
+                      print(sharedPrefs.getString('UserType'));
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -244,11 +245,13 @@ class Login_userState extends State<Login_user> {
                     }
 
                   }else{
+                    print(sharedPrefs.getString('UserType'));
                     Map m = await AddAPI(body , 'https://amer.jit.sa/api/vendor/login');
                     if(m.containsKey("id")){
                       sharedPrefs.setString('UserId', '${m['id']}');
                       sharedPrefs.setString('token', '${m['token']}');
                       sharedPrefs.setString('UserType', 'بائع');
+                      print(sharedPrefs.getString('UserType'));
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(

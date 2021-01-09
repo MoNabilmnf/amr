@@ -3,7 +3,6 @@ import 'package:amr/Global.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:dio/dio.dart' ;
 import 'package:http/http.dart' as http;
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';

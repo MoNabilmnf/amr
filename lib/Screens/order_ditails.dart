@@ -779,7 +779,7 @@ class order_detailsState extends State<order_details>{
   void getAPI() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
-    http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+    http.Response response = await http.get("https://amer.jit.sa/api/user/profile",headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
     Map map = json.decode(response.body);
     print(map);
     print(token);

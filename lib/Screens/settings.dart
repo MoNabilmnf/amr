@@ -217,7 +217,7 @@ class settingsState extends State<settings>{
           SizedBox(height: 8,),
           GestureDetector(
             onTap: (){
-              print("Container clicked");
+              print("Container clickedيييييي");
               Navigator.pushNamed(context, "About_Us");
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
