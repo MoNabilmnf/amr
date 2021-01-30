@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:amr/Global.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -39,7 +40,7 @@ Logout(link) async {  SharedPreferences sharedPrefs = await SharedPreferences.ge
 //   request.fields.addAll(D);
 //   var response = await request.send();
 // }
-EditImage(context,imageFile,username,cityId) async {
+EditImage(context,imageFile,username,cityId,description) async {
   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
   String T = sharedPrefs.getString('token');
   String Res;
@@ -52,9 +53,15 @@ EditImage(context,imageFile,username,cityId) async {
   // }
   var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
   var length = await imageFile.length();
-  var D = {"username":'$username',"city_id":"$cityId"};
+  var D;
+  if(sharedPrefs.getString('UserType') == 'مشتري'){
+    D = {"username":'$username',"city_id":"$cityId"};
+  }else{
+    D = {"username":'$username',"city_id":"$cityId","description":"$description"};
+  }
+
   print("body is $D");
-  var uri = Uri.parse((user_type == 'مشتري')?"https://amer.jit.sa/api/user/profile/update":"https://amer.jit.sa/api/vendor/profile/update");
+  var uri = Uri.parse((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile/update":"https://amer.jit.sa/api/vendor/profile/update");
   var request = new http.MultipartRequest("POST", uri);
   var multipartFile = new http.MultipartFile('image', stream, length,
       filename: basename(imageFile.path));
@@ -77,6 +84,14 @@ EditImage(context,imageFile,username,cityId) async {
       Rsult = valueMap['data'][0].toString();
       return valueMap['data'][0].toString();
 
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }else{
       Rsult = valueMap['data'][0].toString();
       Res = valueMap['data'][0].toString();
@@ -90,8 +105,8 @@ EditImage(context,imageFile,username,cityId) async {
   return Res.toString();
 }
 CreateAccount2(context,imageFile,_controller,_controller3,_controller2,_controller4,_value1,category_id,sub_category_id) async {
-  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-  String T = sharedPrefs.getString('token');
+  // final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+  // String T = sharedPrefs.getString('token');
   String Res;
   var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
   var length = await imageFile.length();
@@ -105,7 +120,7 @@ CreateAccount2(context,imageFile,_controller,_controller3,_controller2,_controll
   var request = new http.MultipartRequest("POST", uri);
   var multipartFile = new http.MultipartFile('image', stream, length,
       filename: basename(imageFile.path));
-  request.headers.addAll({HttpHeaders.authorizationHeader: "Bearer "+ T, "Accept":"application/json"});
+  request.headers.addAll({ "Accept":"application/json"});
   request.files.add(multipartFile);
   request.fields.addAll(D);
   var response = await request.send();
@@ -126,6 +141,7 @@ CreateAccount2(context,imageFile,_controller,_controller3,_controller2,_controll
       return valueMap['data'][0].toString();
 
     }else{
+      Navigator.pop(context);
       onBackPress(context, "${valueMap['data']['message']}");
       Rsult = valueMap['data'][0].toString();
       Res = valueMap['data'][0].toString();
@@ -136,7 +152,118 @@ CreateAccount2(context,imageFile,_controller,_controller3,_controller2,_controll
   // print("sadsdasadsad------ $Res");
   // return Res.toString();
 }
+ChatImageFack(context,imageFile,user_id) async {
+  final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+  String T = sharedPrefs.getString('token');
+  String Res;
+  var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+  var length = await imageFile.length();
+  var D;
+  if((sharedPrefs.getString('UserType') == 'مشتري')){
+    D ={
+      "vendor_id":"$user_id",
+      "message_type":"file"
+    };
+  }else{
+    D ={
+      "user_id":"$user_id",
+      "message_type":"file"
+    };
+  }
 
+
+  var uri = Uri.parse((sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/message/send':'https://amer.jit.sa/api/vendor/message/send');
+  var request = new http.MultipartRequest("POST", uri);
+  var multipartFile = new http.MultipartFile('message', stream, length,
+      filename: basename(imageFile.path));
+  request.headers.addAll({HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+  request.files.add(multipartFile);
+  request.fields.addAll(D);
+  http.Response response = await http.Response.fromStream(await request.send());
+  //var response = await request.send();
+  if (response.statusCode == 200) {
+    print("Image Uploaded");
+    var responsebody = json.decode(response.body);
+    return responsebody['data']['room_id'].toString();
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
+  } else {
+    print("Upload Failed");
+    return "failer";
+
+  }
+
+}
+ChatImage(context,imageFile,user_id) async {
+   final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+   String T = sharedPrefs.getString('token');
+  String Res;
+  var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
+  var length = await imageFile.length();
+  var D;
+   if((sharedPrefs.getString('UserType') == 'مشتري')){
+     D ={
+       "vendor_id":"$user_id",
+       "message_type":"file"
+     };
+   }else{
+     D ={
+       "user_id":"$user_id",
+       "message_type":"file"
+     };
+   }
+
+
+  var uri = Uri.parse((sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/message/send':'https://amer.jit.sa/api/vendor/message/send');
+  var request = new http.MultipartRequest("POST", uri);
+  var multipartFile = new http.MultipartFile('message', stream, length,
+      filename: basename(imageFile.path));
+  request.headers.addAll({HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+  request.files.add(multipartFile);
+  request.fields.addAll(D);
+  var response = await request.send();
+  if (response.statusCode == 200) {
+    print("Image Uploaded");
+    return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
+  } else {
+    print("Upload Failed");
+
+  }
+  print(response.statusCode);
+  response.stream.transform(utf8.decoder).listen((value) async {
+    Map valueMap = json.decode(value);
+    print(valueMap.toString());
+
+    if(response.statusCode == 200){
+      Rsult = valueMap['data'][0].toString();
+      Res = valueMap['data'][0].toString();
+      return valueMap['data'][0].toString();
+
+    }else{
+      onBackPress(context, "${valueMap['data']['message']}");
+      Rsult = valueMap['data'][0].toString();
+      Res = valueMap['data'][0].toString();
+      return valueMap['data'][0].toString();
+    }
+
+  });
+  // print("sadsdasadsad------ $Res");
+  // return Res.toString();
+}
 
 Future uploadmultipleimage(List images) async {
   var uri = Uri.parse("https://amer.jit.sa/api/user/order/store");
@@ -269,6 +396,14 @@ EditOrder2(order_id,context,category_id,sub_category_id,title,description,city_i
   var responsebody = json.decode(response.body);
   if (response.statusCode == 200) {
     return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
   } else {
     onBackPress(context, "${responsebody['data']}");
     print(response.statusCode.toString());
@@ -284,20 +419,23 @@ UpdateOffer(id,List images, context,sub_category_id,title,description,city_id,di
   // var length = await images[0].length();
   // var multipartFile = new http.MultipartFile('image', stream, length,
   //     filename: basename(images[0].path));
-  List<File> files = [];
-  for (Asset asset in images) {
-    final filePath =
-    await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
-    files.add(File(filePath));
+  if(images != null){
+    List<File> files = [];
+    for (Asset asset in images) {
+      final filePath =
+      await FlutterAbsolutePath.getAbsolutePath(asset.identifier);
+      files.add(File(filePath));
+    }
+    for (int i = 0; i < files.length; i++) {
+      var stream = new http.ByteStream(
+          DelegatingStream.typed(files[i].openRead()));
+      var length = await files[i].length();
+      var multipartFile = new http.MultipartFile('images[$i]', stream, length,
+          filename: basename(files[i].path));
+      Demo.add(multipartFile);
+    }
   }
-  for (int i = 0; i < files.length; i++) {
-    var stream = new http.ByteStream(
-        DelegatingStream.typed(files[i].openRead()));
-    var length = await files[i].length();
-    var multipartFile = new http.MultipartFile('images[$i]', stream, length,
-        filename: basename(files[i].path));
-    Demo.add(multipartFile);
-  }
+
   //print("888888 $multipartFile");
   print("88888844 $Demo");
   var D = {"offer_id":"$id","sub_category_id": '$sub_category_id', "title": '$title',
@@ -316,12 +454,20 @@ UpdateOffer(id,List images, context,sub_category_id,title,description,city_id,di
   request.headers.addAll(
       {HttpHeaders.authorizationHeader: T, "Accept": "application/json","Content-Type":"application/json"});
   request.fields.addAll(D);
+  if(images != null){request.files.addAll(Demo);}
 
-  request.files.addAll(Demo);
   var response = await request.send();
   if (response.statusCode == 200) {
     print("Image Uploaded");
     return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
   } else {
     print("Upload Failed");
   }
@@ -333,6 +479,7 @@ UpdateOffer(id,List images, context,sub_category_id,title,description,city_id,di
       Rsult = valueMap['data'][0].toString();
       return 'Success';
     } else {
+      Navigator.pop(context);
       Rsult = valueMap['data'][0].toString();
       onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
@@ -391,6 +538,14 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
   if (response.statusCode == 200) {
     print("Image Uploaded");
     return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
   } else {
     print("Upload Failed");
   }
@@ -402,6 +557,7 @@ CreateOffer(List images, context,sub_category_id,title,description,city_id,distr
       Rsult = valueMap['data'][0].toString();
       return 'Success';
     } else {
+      Navigator.pop(context);
       Rsult = valueMap['data'][0].toString();
       onBackPress(context, "${valueMap['data']['message']}");
       //Res = valueMap['data'][0].toString();
@@ -438,7 +594,7 @@ addOffer(List images, context,order_id,description,price) async {
   var D = {"order_id": '$order_id', "price": '$price',
     "description": "$description"
     //"images":images
-  };
+                      };
   // String T = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczpcL1wvYW1lci5qaXQuc2FcL2FwaVwvdXNlclwvbG9naW4iLCJpYXQiOjE2MDkzNDAzOTEsImV4cCI6MTYwOTU5OTU5MSwibmJmIjoxNjA5MzQwMzkxLCJqdGkiOiJyN1EzUmh3b3JOS2pxbjBsIiwic3ViIjoxLCJwcnYiOiIyM2JkNWM4OTQ5ZjYwMGFkYjM5ZTcwMWM0MDA4NzJkYjdhNTk3NmY3In0.j8HCdYpdO7MFJDGcdUInGER8XCoJ2nb_rSjEDpznLuU';
   String T = sharedPrefs.getString('token');
   var uri = Uri.parse("https://amer.jit.sa/api/vendor/order/add-offer");
@@ -458,6 +614,14 @@ addOffer(List images, context,order_id,description,price) async {
     });
     print("Image Uploaded");
     return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
   } else {
     Navigator.pop(context);
     print("Upload Failed");
@@ -525,6 +689,14 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
   if (response.statusCode == 200) {
     print("Image Uploaded");
     return 'Success';
+  }else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
   } else {
     print("Upload Failed");
   }
@@ -588,6 +760,14 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
     if (response.statusCode == 200) {
       print("Image Uploaded");
       return 'Success';
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     } else {
       print("Upload Failed");
     }
@@ -648,7 +828,7 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
   CreateAccount(context,imageFile, _controller, _controller3, _controller2,
       _controller4, _value1) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-    String T = sharedPrefs.getString('token');
+    //String T = sharedPrefs.getString('token');
     String Res;
     var stream = new http.ByteStream(
         DelegatingStream.typed(imageFile.openRead()));
@@ -665,7 +845,6 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
     var multipartFile = new http.MultipartFile('image', stream, length,
         filename: basename(imageFile.path));
     request.headers.addAll({
-      HttpHeaders.authorizationHeader: "Bearer " + T,
       "Accept": "application/json"
     });
     request.files.add(multipartFile);
@@ -687,6 +866,7 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
         Rsult = valueMap['data'][0].toString();
         return valueMap['data'][0].toString();
       } else {
+        Navigator.pop(context);
         onBackPress(context, "${valueMap['data']['message']}");
         Rsult = valueMap['data'][0].toString();
         Res = valueMap['data'][0].toString();
@@ -766,6 +946,6 @@ CreateOrderTest(List images, context,category_id,sub_category_id,title,descripti
       return responsebody['data'];
     } else {
       print(response.statusCode.toString());
-      return responsebody['data'];
+      return responsebody['data']['message'];
     }
   }

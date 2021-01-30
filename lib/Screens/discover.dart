@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:amr/Global.dart';
+import 'package:amr/user/discover_userSearch.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_stack/image_stack.dart';
@@ -37,12 +39,23 @@ class discoverState extends State<discover>{
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      imageProfile = map['data']['image'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
 
   }
   @override
@@ -57,20 +70,33 @@ class discoverState extends State<discover>{
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get(
       'https://amer.jit.sa/api/vendor/explore/index?sort_by=$Key&price_from=$FpriceFrom&price_to=$FpriceTo&category_id=$FCatID&city_id=$FCityID',
-      headers: {HttpHeaders.authorizationHeader:"$token","Accept": "application/json"},
+      headers: {HttpHeaders.authorizationHeader:"$token","Accept": "application/json","Content-Type": "application/json"},
     );
-    Map map = json.decode(response.body);
-    print(map);
-    List c = map['data']['orders'];
-    if( c.isEmpty){
-      setState(() {
-        Offers = ['kk'];
-      });
-    }else{
-      setState(() {
-        Offers = map['data']['orders'];
-      });
+    if(response.statusCode == 200){
+      print(token);
+      print('https://amer.jit.sa/api/vendor/explore/index?sort_by=$Key&price_from=$FpriceFrom&price_to=$FpriceTo&category_id=$FCatID&city_id=$FCityID');
+      Map map = json.decode(response.body);
+      print(map);
+      List c = map['data']['orders'];
+      if( c.isEmpty){
+        setState(() {
+          Offers = ['kk'];
+        });
+      }else{
+        setState(() {
+          Offers = map['data']['orders'];
+        });
+      }
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }
+
 
 
   }
@@ -146,7 +172,12 @@ class discoverState extends State<discover>{
               Row(children: [
                 Expanded(flex: 6,child:  new GestureDetector(
                   onTap: (){
-                    showSearch(context: context, delegate: DataSearch());
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => discover_userSearch(),
+                        ));
+                    //showSearch(context: context, delegate: DataSearch());
                   },
                   child: Container(padding: EdgeInsets.all(8),
                   height: size.height*0.08,
@@ -188,7 +219,7 @@ class discoverState extends State<discover>{
 
             ],),)
             ),
-            Center(child: Container(margin: EdgeInsets.only(top: size.height*0.30,  bottom: 20),padding:EdgeInsets.all(10),
+            Center(child: Container(margin: EdgeInsets.only(top: size.height*0.30,),padding:EdgeInsets.all(10),
               height: size.height*0.10,
               width: size.width*0.90,
               decoration: BoxDecoration(
@@ -209,7 +240,7 @@ class discoverState extends State<discover>{
                       Offers.clear();
                       sadsad('all_orders');
                     });
-                  },child:Text("جميع العروض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: (offer == 0)?color1:Colors.grey,fontFamily: 'Jana'),),),
+                  },child:Text("جميع الطلبات",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: (offer == 0)?color1:Colors.grey,fontFamily: 'Jana'),),),
 
                   GestureDetector(onTap: (){
                     setState(() {
@@ -247,7 +278,7 @@ class discoverState extends State<discover>{
                  child: CircularProgressIndicator(
                    valueColor: new AlwaysStoppedAnimation<Color>(color1),
                  )):(Offers.contains("kk"))?Center(
-                 child: Text("لا يوجد بيانات")):Container(height:300,child:ListView.builder(
+                 child: Text("لا يوجد بيانات")):Container(height:MediaQuery.of(context).size.height*0.60,child:ListView.builder(
     shrinkWrap: true,
     itemCount: Offers.length,
     itemBuilder: (BuildContext context, int index) {
@@ -257,8 +288,8 @@ class discoverState extends State<discover>{
             MaterialPageRoute(
               builder: (context) => order_ditailsDiscovery(id:Offers[index]['id'] ,),
             ));
-      },child:Container(margin: EdgeInsets.only( bottom: 20),padding:EdgeInsets.all(10),
-        height: size.height*0.45,
+      },child:Container(margin: EdgeInsets.only( bottom: 20),padding:EdgeInsets.only(left: 10,right: 10,),
+        //height: size.height*0.45,
         width: size.width*0.90,
         decoration: BoxDecoration(
           color: Colors.white,
@@ -419,19 +450,20 @@ class discoverState extends State<discover>{
           SizedBox(height: 5,),
           Row(children: [
 
-            ImageStack(
-              imageList: images,
-              imageRadius: 45, // Radius of each images
-              imageCount: 3,
-              totalCount: 4,// Maximum number of images to be shown in stack
-              imageBorderWidth: 3,
-              imageBorderColor: color1,
-              backgroundColor: color2,// Border width around the images
-            ),
-            SizedBox(width: 5,),
-            Text("${Offers[index]['price_to']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
+            // ImageStack(
+            //   imageList: images,
+            //   imageRadius: 45, // Radius of each images
+            //   imageCount: 3,
+            //   totalCount: 4,// Maximum number of images to be shown in stack
+            //   imageBorderWidth: 3,
+            //   imageBorderColor: color1,
+            //   backgroundColor: color2,// Border width around the images
+            // ),
             Spacer(),
+
             Text("${Offers[index]['price_from']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
+            SizedBox(width: 15,),
+            Text("${Offers[index]['price_to']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
           ],),
         ],),
       ),);
@@ -667,7 +699,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
               if(index == 3){
                 Navigator.pushReplacementNamed(context, "Home");
               }else if(index == 2){
-                Navigator.pushReplacementNamed(context, "discover");
+               // Navigator.pushReplacementNamed(context, "discover");
               }else if(index == 1){
                 Navigator.pushReplacementNamed(context, "messages");
               }else if(index == 0){

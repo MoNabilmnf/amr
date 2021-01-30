@@ -1,6 +1,12 @@
+import 'dart:io';
+
+import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:amr/Screens/ChatScreen.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 import '../BNBCustompain.dart';
 
@@ -13,6 +19,10 @@ class messages extends StatefulWidget{
 
 }
 class messagesState extends State<messages>{
+  ScrollController _scrollController = ScrollController();
+  String nextpage;
+  String username = '', imageProfile = '';
+  List messages;
   Color color1 = colorFromHex("f6755f");
   Color color2 = colorFromHex("#FEF2EF");
   Color color3 = colorFromHex("#0acb83");
@@ -22,6 +32,37 @@ class messagesState extends State<messages>{
   Color color7 = colorFromHex("#242a38");
   int main = 3;
   List<String> mtime = [ "9:20 م",'20/3/2020','الثلاثاء',"9:20 م",'20/3/2020',"9:20 م","9:20 م",'20/3/2020','الثلاثاء','الثلاثاء',];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserData();
+    getmessages();
+    _scrollController.addListener(() async {
+      final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String token = sharedPrefs.getString('token');
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+
+        if(nextpage != null){
+          http.Response response = await http.get(nextpage,headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+          Map map = json.decode(response.body);
+          List s = map['data']['rooms'];
+          setState(() {
+            nextpage = map['data']['nextPageUrl'];
+          });
+
+          for(int i = 0 ; i < s.length ; i++){
+            messages.add(s[i]);
+          }
+          // setState(() {
+          //   nextpage = map['data']['data']['next_page_url'];
+          // });
+        }
+        print("$nextpage");
+        print("sdsaddsadsdasadsadad");
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -50,7 +91,7 @@ class messagesState extends State<messages>{
               color: Colors.white,
              // borderRadius: BorderRadius.all(Radius.circular(100.0)),
               image: DecorationImage(
-                image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                image: NetworkImage((imageProfile.isEmpty)?"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png":"$imageProfile"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -91,17 +132,22 @@ class messagesState extends State<messages>{
 
         ],
       ),
-      body:Column(children: [
-        Expanded(
-          child: ListView.separated(
-              itemCount: 10,
+      body:
+      //Column(children: [
+        (messages == null)?Center(
+            child: CircularProgressIndicator(
+              valueColor: new AlwaysStoppedAnimation<Color>(colorFromHex("f6755f")),
+            )):(messages.isEmpty)?Center(child: Text("لا يوجد رسائل"),):
+           ListView.separated(
+             controller: _scrollController,
+              itemCount: messages.length,
               itemBuilder: (BuildContext context, int index) {
                 //final Message chat = chats[index];
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => chatScreen(),
+                      builder: (_) => chatScreen(selectedID: messages[index]['id'],),
                     ),
                   ),
                   child: Container(
@@ -120,7 +166,7 @@ class messagesState extends State<messages>{
                             Expanded(flex: 2,child: Container(
                               width: 300,
                               child: Text(
-                                mtime[index],
+                                messages[index]['last_message_date'],
                                 // overflow: TextOverflow.ellipsis,
                                 //   maxLines: 2,
                                 // textAlign:TextAlign.right,
@@ -130,7 +176,7 @@ class messagesState extends State<messages>{
                             Expanded(flex: 4,child: Container(
                               width: 300,
                               child: Text(
-                                "أحمد محمد حسن",
+                                "${messages[index]['receiver']['username']}",
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
                                 textAlign:TextAlign.right,
@@ -142,7 +188,7 @@ class messagesState extends State<messages>{
                           Container(
                             width: 300,
                             child: Text(
-                              "أالسلام عليكم مرحبا بك اخي الكريم شكرا لك",
+                              "${messages[index]['last_message']}",
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               textAlign:TextAlign.right,
@@ -171,7 +217,7 @@ class messagesState extends State<messages>{
                               color: Colors.white,
                               borderRadius: BorderRadius.all(Radius.circular(100.0)),
                               image: DecorationImage(
-                                image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                                image: NetworkImage("${messages[index]['receiver']['image']}"),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -203,7 +249,7 @@ class messagesState extends State<messages>{
               separatorBuilder: (context, index) {
                 return Divider();
               },
-            ),),
+            ),
         // Expanded(flex: 1,
         //   child: Align(
         //     alignment: Alignment.bottomCenter,
@@ -293,7 +339,7 @@ class messagesState extends State<messages>{
         //       //],),
         //     ),
         //   ),),
-      ],),
+     // ],),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, "NewOrder");
@@ -319,6 +365,65 @@ class messagesState extends State<messages>{
         ],
       ),
     );
+  }
+  void getUserData() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/vendor/profile',
+      headers: {
+        HttpHeaders.authorizationHeader: "$token",
+        "Accept": "application/json"
+      },
+    );
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print("user usr $map");
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        username = map['data']['username'];
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
+  }
+  void getmessages() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      "https://amer.jit.sa/api/vendor/rooms",
+      headers: {
+        HttpHeaders.authorizationHeader: "$token",
+        "Accept": "application/json"
+      },
+    );
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(sharedPrefs.getString('UserType'));
+      print(map);
+      setState(() {
+        messages = map['data']['rooms'];
+        nextpage = map['data']['nextPageUrl'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
   }
 
 }
@@ -424,7 +529,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
               }else if(index == 2){
                 Navigator.pushReplacementNamed(context, "discover");
               }else if(index == 1){
-                Navigator.pushReplacementNamed(context, "messages");
+               // Navigator.pushReplacementNamed(context, "messages");
               }else if(index == 0){
                 Navigator.pushReplacementNamed(context, "settings");
               }
@@ -447,6 +552,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
     );
   }
 }
+
 Color colorFromHex(String hexColor) {
   final hexCode = hexColor.replaceAll('#', '');
   return Color(int.parse('FF$hexCode', radix: 16));

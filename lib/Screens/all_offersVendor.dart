@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:amr/Global.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
@@ -21,10 +22,16 @@ class all_offersVendor extends StatefulWidget{
   }
 
 }
+Color colorFromHex(String hexColor) {
+  final hexCode = hexColor.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
+}
 class all_offersVendorState extends State<all_offersVendor>{
   Color color1 = colorFromHex("f6755f");
   Color color2 = colorFromHex("#FEF2EF");
   List Chat = new List();
+  String nextpage;
+  ScrollController _scrollController = ScrollController();
   List Offers = [];
   List sh = ['https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/15950985605f1345c0b80a0.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053668285faff42c99718.jpg','https://sakeny-production.s3.us-east-1.amazonaws.com/uploads/adds/16053664315faff29f40e0b.jpg'];
   int page = 1;
@@ -33,6 +40,33 @@ class all_offersVendorState extends State<all_offersVendor>{
   void initState() {
     // TODO: implement initState
     super.initState();
+    _scrollController.addListener(() async {
+      final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String token = sharedPrefs.getString('token');
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+
+
+        if(nextpage != null){
+
+          http.Response response = await http.get(nextpage,headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+          Map map = json.decode(response.body);
+          List s = map['data']['offers'];
+          setState(() {
+            nextpage = map['data']['nextPageUrl'];
+          });
+
+          for(int i = 0 ; i < s.length ; i++){
+            Offers.add(s[i]);
+          }
+          // setState(() {
+          //   nextpage = map['data']['data']['next_page_url'];
+          // });
+        }
+        print("$nextpage");
+        print("sdsaddsadsdasadsadad");
+
+      }
+    });
     getOffers(widget.selectedID,'all');
     print("${widget.selectedID}");
   }
@@ -291,8 +325,12 @@ class all_offersVendorState extends State<all_offersVendor>{
           SizedBox(height: size.height*0.02,),
           (Offers.isEmpty)?Container():Expanded(child:ListView.builder(
             shrinkWrap: true,
+            controller: _scrollController,
             itemCount: Offers.length,
             itemBuilder: (BuildContext context, int index) {
+              if(Offers.length == index){
+                return CupertinoActivityIndicator();
+              }
               return GestureDetector(onTap:(){
                 onButtonPressedV(context,Offers[index]['vendor']['image'],Offers[index]['vendor']['username'],Offers[index]['vendor']['rate'],
                     Offers[index]['description'],Offers[index]['price'],Offers[index]['created_at'],Offers[index]['images'],Offers[index]['id']);
@@ -416,11 +454,23 @@ class all_offersVendorState extends State<all_offersVendor>{
       'https://amer.jit.sa/api/vendor/order/offers/$id/$Key',
       headers: {HttpHeaders.authorizationHeader:"$token","Accept": "application/json"},
     );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
-      Offers = map['data']['offers'];
-    });
+    if (response.statusCode == 200) {
+      Map map = json.decode(response.body);
+      print(map);
+      setState(() {
+        Offers = map['data']['offers'];
+        nextpage = map['data']['nextPageUrl'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
 
   }
   Accept(offer_id) async {
@@ -440,6 +490,14 @@ class all_offersVendorState extends State<all_offersVendor>{
     var responsebody = json.decode(response.body);
     if (response.statusCode == 200) {
       return 'success';
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     } else {
       print(response.statusCode.toString());
       return responsebody['data'].toString();
@@ -463,6 +521,14 @@ class all_offersVendorState extends State<all_offersVendor>{
     var responsebody = json.decode(response.body);
     if (response.statusCode == 200) {
       return 'success';
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     } else {
       print(response.statusCode.toString());
       return responsebody['data'];

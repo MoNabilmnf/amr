@@ -1,3 +1,4 @@
+import 'package:amr/user/profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,13 +32,40 @@ class DiscoverDitailsVendores extends StatefulWidget {
 }
 
 class DiscoverDitailsVendoresStat extends State<DiscoverDitailsVendores> {
+  ScrollController _scrollController = ScrollController();
   List more = [];
+  String nextpage;
   Color color2 = colorFromHex("#FEF2EF");
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getall();
+    _scrollController.addListener(() async {
+      final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String token = sharedPrefs.getString('token');
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+
+        if(nextpage != null){
+          http.Response response = await http.get(nextpage,headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+          Map map = json.decode(response.body);
+          List s = map['data']['offers'];
+          setState(() {
+            nextpage = map['data']['nextPageUrl'];
+          });
+
+          for(int i = 0 ; i < s.length ; i++){
+            more.add(s[i]);
+          }
+          // setState(() {
+          //   nextpage = map['data']['data']['next_page_url'];
+          // });
+        }
+        print("$nextpage");
+        print("sdsaddsadsdasadsadad");
+      }
+    });
+
     //getCat();
   }
   Color color1 = colorFromHex("f6755f");
@@ -162,16 +190,16 @@ class DiscoverDitailsVendoresStat extends State<DiscoverDitailsVendores> {
                                                     fontFamily: 'Jana'),
                                               ),
                                               Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
+                                               // mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Icon(
                                                     Icons.location_on_outlined,
                                                     color: color1,
                                                     size: size.width * 0.04,
                                                   ),
+                                                  SizedBox(width: 8,),
                                                   Text(
-                                                    "المملكة العربية السعودية",
+                                                    "${more[index]['city']}",
                                                     style: TextStyle(
                                                         fontWeight: FontWeight.bold,
                                                         fontSize: size.width * 0.02,
@@ -186,7 +214,7 @@ class DiscoverDitailsVendoresStat extends State<DiscoverDitailsVendores> {
                                               ),
                                               Container(
                                                 child: Text(
-                                                  "مكتب متخصص في عقارات شمال الرياض",
+                                                  "${more[index]['description']}",
                                                   overflow: TextOverflow.ellipsis,
                                                   maxLines: 2,
                                                   textAlign: TextAlign.center,
@@ -200,6 +228,11 @@ class DiscoverDitailsVendoresStat extends State<DiscoverDitailsVendores> {
                                           ),
                                         )),
                                     onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => profile(id: more[index]['id'],),
+                                          ));
                                       // Navigator.pop(context);
                                       // Navigator.push(
                                       //     context,
@@ -228,46 +261,10 @@ class DiscoverDitailsVendoresStat extends State<DiscoverDitailsVendores> {
     print(map);
     setState(() {
       more = map['data']['featured_vendors'];
+      nextpage = map['data']['nextPageUrl'];
     });
   }
 
-  void getCat() async {
-    http.Response response = await http.get(
-      'https://amer.jit.sa/api/categories',
-      headers: {"Accept": "application/json"},
-    );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
-
-    });
-  }
-
-  void getDic(id) async {
-    http.Response response = await http.get(
-      'https://amer.jit.sa/api/cities/$id',
-      headers: {"Accept": "application/json"},
-    );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
-
-    });
-
-    //onButtonPressedfloat(context);
-  }
-
-  void getSubCat(id) async {
-    http.Response response = await http.get(
-      'https://amer.jit.sa/api/categories/$id',
-      headers: {"Accept": "application/json"},
-    );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
-
-    });
-  }
 }
 
 Color colorFromHex(String hexColor) {

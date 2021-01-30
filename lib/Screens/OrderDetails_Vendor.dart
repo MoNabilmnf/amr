@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'all_offers.dart';
+import 'all_offersVendorHome.dart';
 
 class order_details_vendor extends StatefulWidget{
   order_details_vendor({this.id});
@@ -114,7 +115,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                 ),
                 Spacer(),
 
-                Text("تفاصيل الطلب",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.white,fontFamily: 'Jana'),),
+                Text("تفاصيل العرض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.white,fontFamily: 'Jana'),),
                 Spacer(),
 
                 IconButton(icon: Icon(Icons.arrow_back_rounded,color: Colors.white,), onPressed: (){
@@ -235,7 +236,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                         color: Colors.grey,size: size.height*0.025,
                       ),
                       SizedBox(width: size.width*0.01,),
-                      new Text("منذ 5 دقائق" + " ",
+                      new Text("${C['offer']['created_at']}" + " ",
                           style: new TextStyle(
                               fontSize: size.height*0.015,
                               color:  Colors.grey,
@@ -431,12 +432,12 @@ class order_details_vendorState extends State<order_details_vendor>{
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => all_offers(selectedID: C['offer']['id'],),
+                            builder: (context) => all_offersVendorHome(selectedID: C['offer']['id'],),
                           ));
                     },child:
-                    Text("جميع العروض",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: color1,fontFamily: 'Jana'),),
+                    Text("جميع الطلبات",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: color1,fontFamily: 'Jana'),),
                     ),
-                    Text("عروض جديدة",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
+                    Text("طلب جديدة",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
 
                     Text("الأعلى تقيماً",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.grey,fontFamily: 'Jana'),),
                   ],),
@@ -480,7 +481,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                                 borderRadius: BorderRadius.all(Radius.circular(100)),
                                 image: DecorationImage(
                                   image: NetworkImage(
-                                      "https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                                      "${SS[index]['user']['image']}"),
                                   fit: BoxFit.cover,
                                 ),
                               ),
@@ -488,7 +489,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                             SizedBox(width: size.width*0.02,),
                             Column(children: [
                               Row(children: [ Text(
-                                'وسيم خالد',
+                                '${SS[index]['user']['username']}',
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'jana',
@@ -513,19 +514,19 @@ class order_details_vendorState extends State<order_details_vendor>{
                                 StarRating(
                                   color: Colors.yellow,
                                   starCount: 5,
-                                  rating: 4.0,
+                                  rating: double.parse("${SS[index]['user']['rate']}"),
                                   size: 14,
                                 ),
                                 SizedBox(width: size.width*0.02,),
-                                Text(
-                                  '${SS[index]['price']} \$',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontFamily: 'jana',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: size.width*0.035,
-                                  ),
-                                ),
+                                // Text(
+                                //   '${SS[index]['price']} \$',
+                                //   style: TextStyle(
+                                //     color: Colors.green,
+                                //     fontFamily: 'jana',
+                                //     fontWeight: FontWeight.bold,
+                                //     fontSize: size.width*0.035,
+                                //   ),
+                                // ),
                               ],),
                             ],)
                           ],),
@@ -547,7 +548,7 @@ class order_details_vendorState extends State<order_details_vendor>{
                           margin:EdgeInsets.only(left: 20,right: 20),
                           width: size.width,
                           child: Text(
-                            "${SS[index]['description']}",
+                            "${SS[index]['note']}",
                             overflow: TextOverflow.ellipsis,
                             maxLines: 3,
                             textAlign:TextAlign.right,

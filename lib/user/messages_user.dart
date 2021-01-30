@@ -1,5 +1,8 @@
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:amr/user/UserOrder.dart';
 import 'package:amr/user/discover_user.dart';
 import 'package:amr/user/settings_user.dart';
 import 'package:dotted_border/dotted_border.dart';
@@ -10,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../BNBCustompain.dart';
 import 'Home_user.dart';
+import 'login_user.dart';
 
 class messages_user extends StatefulWidget{
   @override
@@ -251,7 +255,7 @@ class messages_userState extends State<messages_user>{
         builder: (builder) {
           return FractionallySizedBox(
             heightFactor: 0.90,
-            child: BigListViewWidgetfloat(),
+            child: UserOrder(),
           );
         });
   }
@@ -875,6 +879,40 @@ class messages_userState extends State<messages_user>{
                   )),)));
         });
   }
+  ScrollController _scrollController = ScrollController();
+  String nextpage;
+  String username = '', imageProfile = '';
+  List messages;
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserData();
+    getmessages();
+    _scrollController.addListener(() async {
+      final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String token = sharedPrefs.getString('token');
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+
+        if(nextpage != null){
+          http.Response response = await http.get(nextpage,headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+          Map map = json.decode(response.body);
+          List s = map['data']['rooms'];
+          setState(() {
+            nextpage = map['data']['nextPageUrl'];
+          });
+
+          for(int i = 0 ; i < s.length ; i++){
+            messages.add(s[i]);
+          }
+          // setState(() {
+          //   nextpage = map['data']['data']['next_page_url'];
+          // });
+        }
+        print("$nextpage");
+        print("sdsaddsadsdasadsadad");
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -903,7 +941,7 @@ class messages_userState extends State<messages_user>{
               color: Colors.white,
              // borderRadius: BorderRadius.all(Radius.circular(100.0)),
               image: DecorationImage(
-                image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
+                image: NetworkImage((imageProfile.isEmpty)?"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png":"$imageProfile"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -944,121 +982,122 @@ class messages_userState extends State<messages_user>{
 
         ],
       ),
-      body:Column(children: [
-        Expanded(
-          child: ListView.separated(
-              itemCount: 10,
-              itemBuilder: (BuildContext context, int index) {
-                //final Message chat = chats[index];
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => chatScreen(),
+      body:(messages == null)?Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(colorFromHex("f6755f")),
+          )):(messages.isEmpty)?Center(child: Text("لا يوجد رسائل"),):
+      ListView.separated(
+        controller: _scrollController,
+        itemCount: messages.length,
+        itemBuilder: (BuildContext context, int index) {
+          //final Message chat = chats[index];
+          return GestureDetector(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => chatScreen(selectedID: messages[index]['id'],),
+              ),
+            ),
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 15,
+              ),
+              child: Row(
+                children: <Widget>[
+
+
+                  //SizedBox(width: 5,),
+                  Expanded(flex: 5,child: Column(children: [
+
+                    Row(children: [
+                      Expanded(flex: 2,child: Container(
+                        width: 300,
+                        child: Text(
+                          messages[index]['last_message_date'],
+                          // overflow: TextOverflow.ellipsis,
+                          //   maxLines: 2,
+                          // textAlign:TextAlign.right,
+                          style: TextStyle(fontFamily: 'jana',fontSize: 12,fontWeight: FontWeight.bold),
+                        ),
+                      ),),
+                      Expanded(flex: 4,child: Container(
+                        width: 300,
+                        child: Text(
+                          "${messages[index]['receiver']['username']}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          textAlign:TextAlign.right,
+                          style: TextStyle(fontFamily: 'jana',fontSize: 14,fontWeight: FontWeight.bold),
+                        ),
+                      ),),
+
+                    ],),
+                    Container(
+                      width: 300,
+                      child: Text(
+                        "${messages[index]['last_message']}",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        textAlign:TextAlign.right,
+                        style: TextStyle(fontFamily: 'jana',fontSize: 12,color:Colors.grey ),
+                      ),
                     ),
-                  ),
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
+                  ],)),
+                  SizedBox(width: 5,),
+                  // Expanded(flex: 1,child: Container(
+                  //   width: 50.0,
+                  //   height: 50.0,
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white,
+                  //     borderRadius: BorderRadius.all(Radius.circular(100.0)),
+                  //     image: DecorationImage(
+                  //       image: NetworkImage("http://kilimanjarotrekkingguides.co.uk/uploads/package/801568621938.jpg"),
+                  //       fit: BoxFit.cover,
+                  //     ),
+                  //   ),
+                  // ),),
+                  Expanded(flex: 1,child: Stack(children: [
+                    Container(
+                      width: 50.0,
+                      height: 50.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(100.0)),
+                        image: DecorationImage(
+                          image: NetworkImage("${messages[index]['receiver']['image']}"),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      children: <Widget>[
+                    // Column(children: [
+                    //
+                    //   Container(
+                    //     width: 12.0,
+                    //     height: 12.0,
+                    //     decoration:
+                    //     new BoxDecoration(
+                    //       borderRadius: new BorderRadius.circular(10.0),
+                    //       color: Colors.green,
+                    //       border: new Border.all(
+                    //         color: Colors.white,
+                    //         width: 2.0,
+                    //       ),
+                    //     ),
+                    //
+                    //   ),
+                    // ],),
+                  ],),),
+                ],
+              ),
+            ),
 
-
-                        //SizedBox(width: 5,),
-                        Expanded(flex: 5,child: Column(children: [
-
-                          Row(children: [
-                            Expanded(flex: 1,child: Container(
-                              width: 300,
-                              child: Text(
-                                "الثلاثاء",
-                                // overflow: TextOverflow.ellipsis,
-                                //   maxLines: 2,
-                                // textAlign:TextAlign.right,
-                                style: TextStyle(fontFamily: 'jana',fontSize: 12,fontWeight: FontWeight.bold),
-                              ),
-                            ),),
-                            Expanded(flex: 4,child: Container(
-                              width: 300,
-                              child: Text(
-                                "أحمد محمد حسن",
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                textAlign:TextAlign.right,
-                                style: TextStyle(fontFamily: 'jana',fontSize: 14,fontWeight: FontWeight.bold),
-                              ),
-                            ),),
-
-                          ],),
-                          Container(
-                            width: 300,
-                            child: Text(
-                              "أالسلام عليكم مرحبا بك اخي الكريم شكرا لك",
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              textAlign:TextAlign.right,
-                              style: TextStyle(fontFamily: 'jana',fontSize: 12,color:Colors.grey ),
-                            ),
-                          ),
-                        ],)),
-                        SizedBox(width: 5,),
-                        // Expanded(flex: 1,child: Container(
-                        //   width: 50.0,
-                        //   height: 50.0,
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.white,
-                        //     borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                        //     image: DecorationImage(
-                        //       image: NetworkImage("http://kilimanjarotrekkingguides.co.uk/uploads/package/801568621938.jpg"),
-                        //       fit: BoxFit.cover,
-                        //     ),
-                        //   ),
-                        // ),),
-                        Expanded(flex: 1,child: Stack(children: [
-                          Container(
-                            width: 50.0,
-                            height: 50.0,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                              image: DecorationImage(
-                                image: NetworkImage("https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg"),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Column(children: [
-
-                            Container(
-                              width: 12.0,
-                              height: 12.0,
-                              decoration:
-                              new BoxDecoration(
-                                borderRadius: new BorderRadius.circular(10.0),
-                                color: Colors.green,
-                                border: new Border.all(
-                                  color: Colors.white,
-                                  width: 2.0,
-                                ),
-                              ),
-
-                            ),
-                          ],),
-                        ],),),
-                      ],
-                    ),
-                  ),
-
-                );
-              },
-              separatorBuilder: (context, index) {
-                return Divider();
-              },
-            ),),
-
-      ],),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return Divider();
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           //Navigator.pushNamed(context, "NewOrder");
@@ -1086,7 +1125,65 @@ class messages_userState extends State<messages_user>{
       ),
     );
   }
+  void getUserData() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/user/profile',
+      headers: {
+        HttpHeaders.authorizationHeader: "$token",
+        "Accept": "application/json"
+      },
+    );
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print("user usr $map");
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        username = map['data']['username'];
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
 
+  }
+  void getmessages() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      "https://amer.jit.sa/api/user/rooms",
+      headers: {
+        HttpHeaders.authorizationHeader: "$token",
+        "Accept": "application/json"
+      },
+    );
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(sharedPrefs.getString('UserType'));
+      print(map);
+      setState(() {
+        messages = map['data']['rooms'];
+        nextpage = map['data']['nextPageUrl'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
+  }
 }
 class FABBottomAppBarItem {
   FABBottomAppBarItem({this.iconData, this.text});
@@ -1198,11 +1295,11 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
                       builder: (context) => discover_user(),
                     ));
               }else if(index == 1){
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => messages_user(),
-                    ));
+                // Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => messages_user(),
+                //     ));
               }else if(index == 0){
                 Navigator.pushReplacement(
                     context,

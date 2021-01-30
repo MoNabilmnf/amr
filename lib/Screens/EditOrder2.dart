@@ -313,14 +313,8 @@ class EditOrder2State extends State<EditOrder2>{
               }else if(_controller2.text.isEmpty){
                  onBackPress(context,"أضف سعر");
                }else{
-                 String Res = await UpdateOffer(widget.id,widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
-                 if(Res == 'Success'){
-                   Navigator.pop(context);
-                   Navigator.pop(context);
-                   Navigator.pushReplacementNamed(context, "Home");
-                 }else{
-                   print(Res.toString());
-                 }
+                 _onLoadingLogin(context);
+
                 //Navigator.pushNamed(context, "NewOrder2");
               }
               print("Container clicked");
@@ -361,6 +355,31 @@ class EditOrder2State extends State<EditOrder2>{
 
       ],),),),
     );
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+      String Res = await UpdateOffer(widget.id,widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
+      if(Res == 'Success'){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, "Home");
+      }else{
+        print(Res.toString());
+      }
+    });
+
   }
   void getDic(id) async {
     http.Response response = await http.get(

@@ -8,6 +8,11 @@ String FCatID = '';
 String FCityID = '';
 String FpriceTo = '';
 String FpriceFrom = '';
+String F2CatID = '';
+String F2CityID = '';
+String F2priceTo = '';
+String F2priceFrom = '';
+String F2sort_by = '';
 Future<bool> onBackPress(context,message) {
 
   return showDialog(

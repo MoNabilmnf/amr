@@ -188,7 +188,7 @@ class Registration_userState extends State<Registration_user> {
                           enabledBorder: InputBorder.none,
                           errorBorder: InputBorder.none,
                           disabledBorder: InputBorder.none,
-                          hintText: '+201003578367',
+                          hintText: '01003578367',
                           hintStyle: TextStyle(color: Colors.black),
                         ),
                       ),width: MediaQuery.of(context).size.width * 0.8
@@ -416,6 +416,8 @@ class Registration_userState extends State<Registration_user> {
                           int postion = Cats.indexOf(value);
                           print("$value");
                           CatID = S[postion]['id'];
+                          SubCat.clear();
+                          SC.clear();
                           getSubCat(CatID);
                           print("$value");
                           _value3= value;
@@ -513,19 +515,8 @@ class Registration_userState extends State<Registration_user> {
                     }else{
                       CheckInternet(context);
                       if(type == "مشتري"){
-                        String Res = await CreateAccount(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId);
-                        if(Res == "Success"){
-                          setState(() {
-                            user_type = 'مشتري';
-                          });
-                          SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-                          sharedPrefs.setString('UserType', 'مشتري');
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Code(),
-                              ));
-                        }
+                        _onLoadingLogin(context);
+
 
                       }else{
                         if(CatID == null){
@@ -533,20 +524,9 @@ class Registration_userState extends State<Registration_user> {
                         }else if(SubCatId == null){
                           onBackPress(context,"أختر الفئة الفرعية");
                         }else{
-                          SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-                          String Res = await CreateAccount2(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId,CatID,SubCatId);
-                          if(Res == "Success"){
-                            sharedPrefs.setString('UserType', 'بائع');
-                            sharedPrefs.setString('CatId', '$CatID');
-                            setState(() {
-                              user_type = 'بائع';
-                            });
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Code(),
-                                ));
-                          }
+                          _onLoadingLogin2(context);
+
+
 
                         }
 
@@ -690,6 +670,67 @@ class Registration_userState extends State<Registration_user> {
        S = map['data']['categories'];
       for(int i = 0 ; i <S.length; i++){
         Cats.add(S[i]['title']);
+      }
+    });
+
+  }
+  void _onLoadingLogin2(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+      SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String Res = await CreateAccount2(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId,CatID,SubCatId);
+      if(Res == "Success"){
+        sharedPrefs.setString('UserType', 'بائع');
+        sharedPrefs.setString('CatId', '$CatID');
+        setState(() {
+          user_type = 'بائع';
+        });
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Code(),
+            ));
+      }
+    });
+
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+      String Res = await CreateAccount(context,_image,_controller.text,_controller3.text,_controller2.text,_controller4.text,CityId);
+      if(Res == "Success"){
+        setState(() {
+          user_type = 'مشتري';
+        });
+        SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+        sharedPrefs.setString('UserType', 'مشتري');
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Code(),
+            ));
       }
     });
 

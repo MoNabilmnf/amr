@@ -1,4 +1,7 @@
 import 'package:amr/Global.dart';
+import 'package:amr/Screens/ChatScreen.dart';
+import 'package:amr/Screens/ChatScreenFack.dart';
+import 'package:amr/user/DiscoverDitails.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating/flutter_rating.dart';
@@ -83,7 +86,7 @@ class profileState extends State<profile>{
              ),
              subtitle: Row(children: [
                Icon(Icons.location_on_outlined,color: color1,size: size.width*0.05,),
-               Text(
+               Text((ProfileData==null)?"":
                  '${ProfileData['city']['title']}',
                  style: TextStyle(
                    color: color1,
@@ -190,7 +193,7 @@ class profileState extends State<profile>{
            Spacer(),
            RaisedButton(
              onPressed: () async {
-
+               getChatStatuse();
              },
              color: color1,
              child:  Text("أطلب منتجك",
@@ -369,7 +372,7 @@ class profileState extends State<profile>{
                            Spacer(),
 
                            GestureDetector(onTap: (){
-
+                             onButtonPressedV(context,'https://amer.jit.sa/api/user/explore/category-offers/${categories_with_offers[index]['id']}',categories_with_offers[index]['title'],'offers');
                            },child:Text("عرض الكل",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12,color: Colors.grey,fontFamily: 'Jana'),),),
                            Text("  ",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 12,color: Colors.grey,fontFamily: 'Jana'),),
                            Icon(Icons.arrow_back_ios_rounded,color: Colors.grey,size: 12,),
@@ -383,6 +386,7 @@ class profileState extends State<profile>{
                              scrollDirection: Axis.horizontal,
                              itemCount: offers.length,
                              itemBuilder: (BuildContext context, int index){
+                              // List d = [0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
                                return new InkWell(
                                  onTap: (){
                                    print("asdasdname");
@@ -428,13 +432,16 @@ class profileState extends State<profile>{
                                            child: GestureDetector(
                                                onTap: () async {
                                                  print("hghgghghgh");
+                                                 // setState(() {
+                                                 //   (fa[index] == 1)
+                                                 //       ? fa[index] = 0
+                                                 //       : fa[index] = 1;
+                                                 // });
                                                  String Res = await addFavorite(offers[index]['id']);
-                                                 if(Res != "success"){onBackPress(context,Res);}
-                                                 setState(() {
-                                                   (fa[index] == 1)
-                                                       ? fa[index] = 0
-                                                       : fa[index] = 1;
-                                                 });
+                                                 if(Res != "success"){onBackPress(context,Res);}else{
+                                                   getprofileData();
+                                                 }
+
 
                                                },
                                                child: Container(
@@ -497,13 +504,29 @@ class profileState extends State<profile>{
      ],),),),
     );
   }
+  void onButtonPressedV(context,url,title,type) {
+    showModalBottomSheet(
+        shape: RoundedRectangleBorder(
+          borderRadius: new BorderRadius.only(
+              topLeft: const Radius.circular(22.0),
+              topRight: const Radius.circular(22.0)),
+        ),
+        context: context,
+        isScrollControlled: true,
+        builder: (builder) {
+          return FractionallySizedBox(
+            heightFactor: 0.70,
+            child: DiscoverDitails(url: url,title: title,type: type,),
+          );
+        });
+  }
   addFavorite(order_id) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
     var body = {
-      "order_id":"$order_id"
+      "offer_id":"$order_id"
     };
-    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    http.Response response = await http.post("https://amer.jit.sa/api/user/offer/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
     print(response.body.toString());
     var responsebody = json.decode(response.body);
     if(response.statusCode == 200){
@@ -511,6 +534,32 @@ class profileState extends State<profile>{
     }else{
       return '${responsebody['data']['message']}';
     }
+  }
+  void getChatStatuse() async {
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.get(
+      'https://amer.jit.sa/api/user/rooms/checkExistsRoom/${widget.id}',
+      headers: {HttpHeaders.authorizationHeader: "$token","Accept": "application/json"},
+    );
+    Map map = json.decode(response.body);
+    print(map);
+     if(response.statusCode == 444){
+       Navigator.push(
+         context,
+         MaterialPageRoute(
+           builder: (_) => ChatScreenFack(selectedID:ProfileData['id'],Name: ProfileData['username'],image: ProfileData['image'],),
+         ),
+       );
+    }else{
+       Navigator.push(
+         context,
+         MaterialPageRoute(
+           builder: (_) => chatScreen(selectedID:map['data']['room_id'],),
+         ),
+       );
+     }
+
   }
   void getprofileData() async {
     print("id is ${widget.id}");

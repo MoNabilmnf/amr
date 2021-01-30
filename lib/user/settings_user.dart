@@ -14,6 +14,7 @@ import '../BNBCustompain.dart';
 import '../Global.dart';
 import 'ForgotPass_user.dart';
 import 'Home_user.dart';
+import 'UserOrder.dart';
 import 'discover_user.dart';
 import 'login_user.dart';
 
@@ -260,7 +261,7 @@ class settings_userState extends State<settings_user>{
         builder: (builder) {
           return FractionallySizedBox(
             heightFactor: 0.90,
-            child: BigListViewWidgetfloat(),
+            child: UserOrder(),
           );
         });
   }
@@ -888,13 +889,44 @@ class settings_userState extends State<settings_user>{
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      imageProfile = map['data']['image'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        imageProfile = map['data']['image'];
+        saturday2 = (map['data']['notification_status'] == "1")?true:false;
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
 
+
+  }
+  Notifcation(id) async {  SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+
+  String token = sharedPrefs.getString('token') ;
+  http.Response response = await http.get('https://amer.jit.sa/api/user/notification-status/$id',headers: { "Accept":"application/json",'Content-type': 'application/json','Authorization':token});
+  print(response.body.toString());
+  var responsebody = json.decode(response.body);
+  if(response.statusCode == 200){
+    return 'success';
+  }
+  else if(response.statusCode == 401){
+    sharedPrefs.remove('token');
+    sharedPrefs.remove('UserType');
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Login_user(),
+        ));
+  }
   }
   @override
   void initState() {
@@ -1016,7 +1048,9 @@ class settings_userState extends State<settings_user>{
                   onChanged: (value) async {
                     setState(() {
                       saturday2 = value;
+
                     });
+                    await Notifcation((value==true?1:0));
                   },
                 ),),
               //Icon(Icons.arrow_back_ios,color: Colors.black,),
@@ -1085,11 +1119,11 @@ class settings_userState extends State<settings_user>{
           SizedBox(height: 8,),
           GestureDetector(
             onTap: () async {
-              SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
-              sharedPrefs.remove('UserType');
-              //print("Container clicked");
+              // SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+              // sharedPrefs.remove('UserType');
+              // //print("Container clicked");
               Navigator.pushNamed(context, "security_and_privacy");
-              print(sharedPrefs.getString('UserType'));
+              //print(sharedPrefs.getString('UserType'));
             },
             child:Container(child: Row(mainAxisAlignment:MainAxisAlignment.end,children: [
               SizedBox(width: 15,),
@@ -1106,26 +1140,32 @@ class settings_userState extends State<settings_user>{
               SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
               print("Container clicked");
 
-              if(user_type == 'مشتري'){
+              if(sharedPrefs.getString('UserType') == 'مشتري'){
                 String Res = await Logout('https://amer.jit.sa/api/user/logout');
                 if(Res == "success"){
                   sharedPrefs.remove('UserType');
+                  sharedPrefs.remove('token');
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => Login_user(),
                       ));
+                }else{
+                  onBackPress(context,Res);
                 }
 
               }else{
                 String Res = await Logout('https://amer.jit.sa/api/vendor/logout');
                 if(Res == "success"){
                   sharedPrefs.remove('UserType');
+                  sharedPrefs.remove('token');
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => Login_user(),
                       ));
+                }else{
+                  onBackPress(context,Res);
                 }
 
               }
@@ -1378,11 +1418,11 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
                       builder: (context) => messages_user(),
                     ));
               }else if(index == 0){
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => settings_user(),
-                    ));
+                // Navigator.pushReplacement(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (context) => settings_user(),
+                //     ));
               }
               print("new page $index");
             },

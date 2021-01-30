@@ -106,7 +106,7 @@ class NewOrder2State extends State<NewOrder2>{
               children: [
                 Container(
                   width: size.width * 0.40,
-                  height: size.height * 0.12,
+                  //height: size.height * 0.12,
                   padding: EdgeInsets.only(left: 8, right: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -118,15 +118,15 @@ class NewOrder2State extends State<NewOrder2>{
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Text('المدينة',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontFamily: 'jana',
-                                  color: Colors.grey)),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Text('المدينة',
+                      //         style: TextStyle(
+                      //             fontSize: 12.0,
+                      //             fontFamily: 'jana',
+                      //             color: Colors.grey)),
+                      //   ],
+                      // ),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _value1,
@@ -190,7 +190,7 @@ class NewOrder2State extends State<NewOrder2>{
                     ? Container()
                     : Container(
                   width: size.width * 0.40,
-                  height: size.height * 0.12,
+                  //height: size.height * 0.12,
                   padding: EdgeInsets.only(left: 8, right: 8),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -202,15 +202,15 @@ class NewOrder2State extends State<NewOrder2>{
                   ),
                   child: Column(
                     children: [
-                      Row(
-                        children: [
-                          Text('الحي',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontFamily: 'jana',
-                                  color: Colors.grey)),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Text('الحي',
+                      //         style: TextStyle(
+                      //             fontSize: 12.0,
+                      //             fontFamily: 'jana',
+                      //             color: Colors.grey)),
+                      //   ],
+                      // ),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _value2,
@@ -309,13 +309,7 @@ class NewOrder2State extends State<NewOrder2>{
               }else if(_controller2.text.isEmpty){
                  onBackPress(context,"أضف سعر");
                }else{
-                 String Res = await CreateOffer(widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
-                 if(Res == 'Success'){
-                   Navigator.pop(context);
-                   Navigator.pushReplacementNamed(context, "Home");
-                 }else{
-                   print(Res.toString());
-                 }
+                 _onLoadingLogin(context);
                 //Navigator.pushNamed(context, "NewOrder2");
               }
               print("Container clicked");
@@ -356,6 +350,31 @@ class NewOrder2State extends State<NewOrder2>{
 
       ],),),),
     );
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+
+      String Res = await CreateOffer(widget.Images, context,widget.CatId,widget.title,widget.description,CityId,DicId,_controller2.text);
+      if(Res == 'Success'){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, "Home");
+      }else{
+        print(Res.toString());
+      }
+    });
+
   }
   void getDic(id) async {
     http.Response response = await http.get(

@@ -4,7 +4,10 @@ import 'dart:io';
 
 import 'package:amr/APIs/Api.dart';
 import 'package:amr/Global.dart';
+import 'package:amr/Screens/notification.dart';
 import 'package:amr/Screens/order_ditails.dart';
+import 'package:amr/user/login_user.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:amr/user/discover_user.dart';
 import 'package:amr/user/messages_user.dart';
@@ -49,6 +52,7 @@ class Home_userState extends State<Home_user>{
   List Imagess = [];
   List S = [];
   List C ;
+  List done_orders =[];
   String username='';
   String profileImage = '';
   Map Profile ;
@@ -924,13 +928,43 @@ class Home_userState extends State<Home_user>{
                   )),)));
         });
   }
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getIndex();
     getAPI();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        final notification = message['notification'];
 
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        // Navigator.pushNamed(context, "chatScreen");
+        // final notification = message['data'];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => notification(),
+          ),
+        );
+      },
+      onResume: (Map<String, dynamic> message) async {
+        // Navigator.pushNamed(context, "chatScreen");
+        // print("onResume: $message");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => notification(),
+          ),
+        );
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
   }
   @override
   Widget build(BuildContext context) {
@@ -1264,7 +1298,7 @@ class Home_userState extends State<Home_user>{
                           imageBorderColor: color1,
                           backgroundColor: color2,// Border width around the images
                         ),
-                        SizedBox(width: 5,),
+
                        // Text("خمس عروض جديده",style: TextStyle(fontFamily: 'jana'),),
                         Spacer(),
                         Text("${C[index]['price_from']} رس",style: TextStyle(fontFamily: 'jana',color: color3),),
@@ -1276,6 +1310,152 @@ class Home_userState extends State<Home_user>{
                     ],),
                   ),);
                 }),
+            Row(mainAxisAlignment:MainAxisAlignment.start,children: [
+              Text("العروض المغلقه",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.black,fontFamily: 'Jana'),),
+            ],),
+           // SizedBox(height: 10,),
+            (done_orders.isEmpty)?Container(margin: EdgeInsets.only(top: 10,  bottom: 20),padding:EdgeInsets.all(10),
+              // height: size.height*0.45,
+              width: size.width*0.90,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10)
+                ),
+              ),
+              child: Column(children: [
+                RawMaterialButton(
+                  onPressed: () {},
+                  // elevation: 2.0,
+                  fillColor: color1,
+                  child: Icon(
+                    Icons.shopping_cart_outlined,
+                    //size: 35.0,
+                    color: Colors.white,
+                  ),
+                  padding: EdgeInsets.all(15.0),
+                  shape: CircleBorder(),
+                ),
+                // ClipOval(
+                //   child: Material(
+                //     color: Colors.blue, // button color
+                //     child: InkWell(
+                //       splashColor: Colors.red, // inkwell color
+                //       child: SizedBox(width: 56, height: 56, child: Icon(Icons.menu)),
+                //       onTap: () {},
+                //     ),
+                //   ),
+                // ),
+                Text("لا يوجد لديك طلبات", style: TextStyle(color: Colors.black,fontFamily: 'jana',
+                    fontSize: 28,fontWeight: FontWeight.bold),),
+                Text("إرسل طلبك الاول للحصول على عرض", style: TextStyle(color: Colors.grey,fontFamily: 'jana',
+                    fontSize: 14,fontWeight: FontWeight.bold),),
+              ],),
+            ):ListView.builder(
+                shrinkWrap: true,
+                //scrollDirection: Axis.horizontal,
+                controller: _scrollController,
+                itemCount: done_orders.length,
+                itemBuilder: (BuildContext context, int index){
+
+
+                  return Container(margin: EdgeInsets.only(   bottom: 20),
+                    //height: size.height*0.30,
+                    width: size.width*0.90,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(10),
+                          topRight: Radius.circular(10),
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10)
+                      ),
+
+                      // boxShadow: [
+                      //   BoxShadow(
+                      //     color: Colors.grey.withOpacity(0.5),
+                      //     spreadRadius: 5,
+                      //     blurRadius: 7,
+                      //     offset: Offset(0, 3), // changes position of shadow
+                      //   ),
+                      // ],
+                    ),
+                    child: Column(children: [
+                      Row(children: [
+                        new RaisedButton(
+                          onPressed: () async {
+
+                          },
+                          color: color6,
+                          child: new Row(
+                            children: <Widget>[
+                              new Icon(
+                                Icons.assignment_turned_in,
+                                color: color3,
+                              ),
+                              new Text("  ${done_orders[index]['status_text']}",
+                                  style: new TextStyle(
+                                      fontSize: 15,
+                                      color:  color3,
+                                      fontFamily: 'jana'
+                                  )),
+
+                            ],
+                          ),
+                        ),
+                        Spacer(),
+                        Container(
+                          child: new Row(
+                            children: <Widget>[
+                              new Text("${done_orders[index]['created_at']}" + " ",
+                                  style: new TextStyle(
+                                      fontSize: 15,
+                                      color:  Colors.grey,
+                                      fontFamily: 'jana'
+                                  )),
+                              new Icon(
+                                Icons.access_alarm_rounded,
+                                color: Colors.grey,
+                              )
+                            ],
+                          ),),
+                      ],),
+                      Container(
+                        width: 300,
+                        child: Text(
+                          "${done_orders[index]['title']}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          textAlign:TextAlign.right,
+                          style: TextStyle(fontFamily: 'jana',fontSize: 16,fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      new RaisedButton(
+                        onPressed: () async {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => order_details(id: done_orders[index]['id'],),
+                              ));
+                        },
+                        color: color4,
+                        child:  Text("تفاصيل الطلب",
+                            style: new TextStyle(
+                                fontSize: 15,
+                                color:  color5,
+                                fontFamily: 'jana'
+                            )),
+                      ),
+                    ],),
+                  );
+                }),
+
+
+
+
           ],),),
 
         ],),)),),
@@ -1320,8 +1500,16 @@ class Home_userState extends State<Home_user>{
     if(response.statusCode == 200){
       setState(() {
         C = map['data']['active_orders'];
-        //City = map['data']['cities'];
+        done_orders = map['data']['done_orders'];
       });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }else{
       setState(() {
         C = [];
@@ -1335,15 +1523,27 @@ class Home_userState extends State<Home_user>{
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get("https://amer.jit.sa/api/user/profile",headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      Profile = map['data'];
-      username = map['data']['username'];
-      profileImage =  map['data']['image'];
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        Profile = map['data'];
+        username = map['data']['username'];
+        profileImage =  map['data']['image'];
 
-    });
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
+
 
   }
 

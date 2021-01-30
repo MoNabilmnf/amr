@@ -280,7 +280,7 @@ class order_ditailsDiscoveryState extends State<order_ditailsDiscovery>{
                         color: Colors.grey,size: size.height*0.025,
                       ),
                       SizedBox(width: size.width*0.01,),
-                      new Text("منذ 5 دقائق" + " ",
+                      new Text("${C['order']['created_at']}" + " ",
                           style: new TextStyle(
                               fontSize: size.height*0.015,
                               color:  Colors.grey,
@@ -525,7 +525,7 @@ class order_ditailsDiscoveryState extends State<order_ditailsDiscovery>{
                                borderRadius: BorderRadius.all(Radius.circular(100)),
                                image: DecorationImage(
                                  image: NetworkImage(
-                                     "$imageProfile"),
+                                     "${SS[index]['vendor']['image']}"),
                                  fit: BoxFit.cover,
                                ),
                              ),
@@ -533,7 +533,7 @@ class order_ditailsDiscoveryState extends State<order_ditailsDiscovery>{
                            SizedBox(width: size.width*0.02,),
                            Column(children: [
                              Row(children: [ Text(
-                               '$username',
+                               '${SS[index]['vendor']['username']}',
                                style: TextStyle(
                                  color: Colors.black,
                                  fontFamily: 'jana',

@@ -4,6 +4,7 @@ import 'package:amr/Global.dart';
 import 'package:amr/Screens/send_your_order.dart';
 import 'package:amr/user/UserOrder.dart';
 import 'package:amr/user/UserOrderupdate.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +282,7 @@ class order_detailsState extends State<order_details>{
                         color: Colors.grey,size: size.height*0.025,
                       ),
                       SizedBox(width: size.width*0.01,),
-                      new Text("منذ 5 دقائق" + " ",
+                      new Text("${C['order']['created_at']}" + " ",
                           style: new TextStyle(
                               fontSize: size.height*0.015,
                               color:  Colors.grey,
@@ -330,7 +331,7 @@ class order_detailsState extends State<order_details>{
                     SizedBox(width: size.width*0.02,),
                     Column(children: [
                       Row(children: [ Text(
-                        '$username',
+                        '${C['order']['user']['username']}',
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'jana',
@@ -534,7 +535,7 @@ class order_detailsState extends State<order_details>{
                            SizedBox(width: size.width*0.02,),
                            Column(children: [
                              Row(children: [ Text(
-                               '$username',
+                               '${SS[index]['vendor']['username']}',
                                style: TextStyle(
                                  color: Colors.black,
                                  fontFamily: 'jana',
@@ -777,16 +778,29 @@ class order_detailsState extends State<order_details>{
   }
 
   void getAPI() async {
+
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get("https://amer.jit.sa/api/user/profile",headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      username = map['data']['username'];
-      imageProfile = map['data']['image'];
-    });
+
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        username = map['data']['username'];
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
 
   }
 }

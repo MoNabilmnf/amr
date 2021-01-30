@@ -227,7 +227,7 @@ class NewOrderState extends State<NewOrder>{
             //   ],),
             //
             // ),
-            (SubCat.isEmpty)?Container():Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+            (SubCat.isEmpty)?Container():Container(width:size.width*0.40 ,padding: EdgeInsets.only(left: 8,right:8 ),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.only(
@@ -238,9 +238,9 @@ class NewOrderState extends State<NewOrder>{
                 ),
               ),
               child: Column(children: [
-                Row(children: [
-                  Text('الفئة الفرعية',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
-                ],),
+                // Row(children: [
+                //   Text('الفئة الفرعية',style: TextStyle(fontSize: 12.0,fontFamily: 'jana',color: Colors.grey)),
+                // ],),
                 DropdownButtonHideUnderline(child:DropdownButton<String>(
                   value: _value4,
                   isExpanded: true,
@@ -463,7 +463,8 @@ class NewOrderState extends State<NewOrder>{
               }else if(imagesNew.isEmpty){
                 onBackPress(context,"أضف صور");
               }else{
-                Navigator.pushReplacement(
+
+                Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => NewOrder2(title: _controller.text,description: _controller2.text,CatId: SubCatId,Images: imagesNew,),
@@ -510,6 +511,7 @@ class NewOrderState extends State<NewOrder>{
       ],),),),),
     );
   }
+
   File _image;
   final picker = ImagePicker();
 

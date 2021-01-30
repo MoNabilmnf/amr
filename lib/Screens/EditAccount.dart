@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:amr/APIs/Api.dart';
 import 'package:amr/Global.dart';
+import 'package:amr/user/login_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -18,21 +19,26 @@ class EditAccount extends StatefulWidget {
     return EditAccountState();
   }
 }
-
+Color colorFromHex(String hexColor) {
+  final hexCode = hexColor.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
+}
 class EditAccountState extends State<EditAccount> {
   final picker = ImagePicker();
   File _image;
+  String usertype = '';
   String profileImage = '';
   Map Profile ;
   String _value1 ;
   List<String> City = new List();
   List C = [];
   int cityId;
-  String username='';
+  String username='', description = '';
   String CityName = '';
 
   Color color1 = colorFromHex("f6755f");
   final TextEditingController _phone = new TextEditingController();
+  final TextEditingController _description = new TextEditingController();
   final TextEditingController _city = new TextEditingController();
   @override
   void initState() {
@@ -182,7 +188,7 @@ class EditAccountState extends State<EditAccount> {
                 ),
               ],),
               SizedBox(height: 20,),
-              Row(children: [
+              (usertype == "بائع")?Row(children: [
                 Text(
                   'وصف سريع',
                   style: TextStyle(
@@ -193,6 +199,7 @@ class EditAccountState extends State<EditAccount> {
                   ),
                 ),
                 Spacer(),
+
                 Container(
                   margin: EdgeInsets.all(5),
                   width: 40.0,
@@ -203,13 +210,13 @@ class EditAccountState extends State<EditAccount> {
 
                   ),
                   child: IconButton(onPressed: (){
-
+                    _onDescPress();
                   },icon: Icon(Icons.edit,color: Colors.white,size: 18,),),
                 ),
-              ],),
-              Row(children: [
+              ],):Container(),
+              (usertype == "بائع")?Row(children: [
                 Text(
-                  'مكتب متخصص في عقارات شمال العراق',
+                  '$description',
                   style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'jana',
@@ -217,7 +224,7 @@ class EditAccountState extends State<EditAccount> {
                     fontSize: 14,
                   ),
                 ),
-              ],),
+              ],):Container(),
               SizedBox(height: 20,),
               Row(children: [
                 Text(
@@ -382,16 +389,33 @@ class EditAccountState extends State<EditAccount> {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     http.Response response = await http.get((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile":'https://amer.jit.sa/api/vendor/profile',headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      Profile = map['data'];
-      username = map['data']['username'];
-      profileImage =  map['data']['image'];
-      cityId = map['data']['city']['id'];
-      CityName = map['data']['city']['title'];
-    });
+    if (response.statusCode == 200) {
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        usertype = sharedPrefs.getString('UserType');
+        Profile = map['data'];
+        if(sharedPrefs.getString('UserType') == 'مشتري'){
+          //username = map['data']['username'];
+        }else{
+          description = map['data']['description'];
+        }
+        username = map['data']['username'];
+        profileImage =  map['data']['image'];
+        cityId = map['data']['city']['id'];
+        CityName = map['data']['city']['title'];
+      });
+
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
 
   }
   Future getImage() async {
@@ -459,6 +483,52 @@ class EditAccountState extends State<EditAccount> {
                     //Navigator.of(context).pop();
                     //Brands.clear();
                     //getAPI('https://dashboard.urate.sa/api/mobile/all-brands?search=${_phone.text}','Brands');
+
+                  },
+                ),
+
+              ]
+
+          );
+        }
+    );
+  }
+  Future<bool> _onDescPress() {
+
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              content:Theme(
+                data: new ThemeData(
+                    primaryColor: Colors.grey,
+                    accentColor: Colors.grey,
+                    hintColor: Colors.grey
+                ),
+                child:TextFormField(
+                  textDirection: TextDirection.rtl,
+                  controller: _description,
+                  cursorColor: Colors.grey,
+                  maxLength: 300,
+                  textAlign:TextAlign.center,
+                  keyboardType: TextInputType.text,
+                  decoration: InputDecoration(
+                      counterText: '',
+                      //border: InputBorder.none,
+                      labelText: 'وصف سريع'
+                  ),
+                ),),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("حفظ",style: TextStyle(color: Colors.deepPurple),),
+                  onPressed: () async {
+                   // Navigator.of(context).pop();
+                    setState(() {
+                      description = _description.text;
+                    });
+                    Navigator.of(context).pop();
+
+
 
                   },
                 ),
@@ -553,7 +623,7 @@ class EditAccountState extends State<EditAccount> {
     new Future.delayed(new Duration(seconds: 3), () async {
       if(_image == null){
 
-        String Res = await Addinter(username,cityId);
+        String Res = await Addinter(username,cityId,description);
         if(Res == "success"){
 
           Navigator.pop(context);
@@ -566,7 +636,7 @@ class EditAccountState extends State<EditAccount> {
           onBackPress(context,"$Res");
         }
       }else{
-      String Res = await EditImage(context,_image,username,cityId);
+      String Res = await EditImage(context,_image,username,cityId,description);
       print(Res);
       if(Res == 'success'){
         // Navigator.of(context).pop();
@@ -578,13 +648,23 @@ class EditAccountState extends State<EditAccount> {
 
   }
 
-  Addinter(username,city_id) async {
+  Addinter(username,city_id,description) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
-    var body = {
-      "username":"$username",
-      "city_id":'$city_id'
-    };
+    var body;
+    if(sharedPrefs.getString('UserType') == 'مشتري'){
+      body = {
+        "username":"$username",
+        "city_id":'$city_id'
+      };
+    }else{
+      body = {
+        "username":"$username",
+        "description":"$description",
+        "city_id":'$city_id'
+      };
+
+    }
     http.Response response = await http.post((sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/profile/update":"https://amer.jit.sa/api/vendor/profile/update",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
     print(response.body.toString());
     var responsebody = json.decode(response.body);
@@ -592,6 +672,14 @@ class EditAccountState extends State<EditAccount> {
 
 
       return 'success';
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }else{
 
       return '${responsebody['data']['message']}';

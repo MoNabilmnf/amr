@@ -13,19 +13,20 @@ import 'dart:convert';
 
 import '../Global.dart';
 
-class chatScreen extends StatefulWidget{
+class ChatScreenFack extends StatefulWidget{
   int selectedID;
+  String image,Name;
 
 
-  chatScreen({this.selectedID});
+  ChatScreenFack({this.selectedID,this.image,this.Name});
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return chatScreenState();
+    return ChatScreenFackState();
   }
 
 }
-class chatScreenState extends State<chatScreen>{
+class ChatScreenFackState extends State<ChatScreenFack>{
   Color color1 = colorFromHex("f6755f");
   List Chat = new List();
   File _image;
@@ -37,6 +38,7 @@ class chatScreenState extends State<chatScreen>{
   String UserType = '';
   int receiverId ;
   String imageProfile = '';
+  String RoomId = '';
   final TextEditingController _controller = new TextEditingController();
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
@@ -44,13 +46,16 @@ class chatScreenState extends State<chatScreen>{
   void initState() {
     // TODO: implement initState
     super.initState();
-    getmessages();
+    //getmessages();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
         final notification = message['notification'];
-        Chat.clear();
-        getmessages();
+        if(RoomId.isNotEmpty){
+          Chat.clear();
+          getmessages(RoomId);
+        }
+
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
@@ -102,7 +107,7 @@ class chatScreenState extends State<chatScreen>{
       appBar: AppBar(
         // title: Center(child:Text('${widget.bill_code}'),),
         title: Center(child:Column(children: [
-          Text((username.isEmpty)?'':'${username}',style: TextStyle(
+          Text((widget.Name.isEmpty)?'':'${widget.Name}',style: TextStyle(
               color: Colors.black,
               fontFamily: 'jana'
           ,fontWeight: FontWeight.bold,fontSize: 14),),
@@ -128,7 +133,7 @@ class chatScreenState extends State<chatScreen>{
               color: Colors.white,
               // borderRadius: BorderRadius.all(Radius.circular(100.0)),
               image: DecorationImage(
-                image: NetworkImage((imageProfile.isEmpty)?"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png":"$imageProfile"),
+                image: NetworkImage((widget.image.isEmpty)?"https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png":"${widget.image}"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -186,10 +191,10 @@ class chatScreenState extends State<chatScreen>{
                         ),
                       ),
                     ),
-                   // Spacer(),
-                   // Column(children: [
+                  //  Spacer(),
+                  //  Column(children: [
                   //    Icon(MaterialIcons.done_all,color: color1,),
-                  //    Text('${Chat[index]['created_at']}',style: TextStyle(color: Colors.black),),
+                   //   Text('${Chat[index]['created_at']}',style: TextStyle(color: Colors.black),),
                    // ],),
                   ],) ,);
                 }else{
@@ -275,10 +280,10 @@ class chatScreenState extends State<chatScreen>{
                         ),
                       ),
                     ),
-                   // Spacer(),
-                   // Column(children: [
-                     // Icon(MaterialIcons.done_all,color: color1,),
-                     // Text('${Chat[index]['created_at']}',style: TextStyle(color: Colors.black),),
+                  //  Spacer(),
+                  //  Column(children: [
+                  //    Icon(MaterialIcons.done_all,color: color1,),
+                  //    Text('${Chat[index]['created_at']}',style: TextStyle(color: Colors.black),),
                     //],),
                   ],) ,);
                 }else{
@@ -596,13 +601,13 @@ class chatScreenState extends State<chatScreen>{
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     if((sharedPrefs.getString('UserType') == 'مشتري')){
       d ={
-        "vendor_id":"$receiverId",
+        "vendor_id":"${widget.selectedID}",
         "message_type":"text",
         "message":"$message"
       };
     }else{
       d ={
-        "user_id":"$receiverId",
+        "user_id":"${widget.selectedID}",
         "message_type":"text",
         "message":"$message"
       };
@@ -619,11 +624,14 @@ class chatScreenState extends State<chatScreen>{
     var responsebody = json.decode(response.body);
     if (response.statusCode == 200) {
       Chat.clear();
-      getmessages();
+      getmessages(responsebody['data']['room_id']);
+      setState(() {
+        RoomId = responsebody['data']['room_id'].toString();
+      });
       return 'success';
     } else {
       print(response.statusCode.toString());
-      return responsebody['data']['message'];
+      return responsebody['data'];
     }
   }
   Future getImageFiles() async {
@@ -636,9 +644,18 @@ class chatScreenState extends State<chatScreen>{
           _image = File(pickedFile.path);
 
         });
-        await ChatImage(context,_image,receiverId);
-        Chat.clear();
-        getmessages();
+       String Res = await ChatImageFack(context,_image,widget.selectedID);
+       if(Res != "failer"){
+         Chat.clear();
+         getmessages(Res);
+         setState(() {
+           RoomId = Res;
+         });
+         //print("sadsadata $Res");
+       }
+      // print("sadsadata $Res");
+        //Chat.clear();
+        //getmessages("2");
         // if(Res == "Success"){
         //   Chat.clear();
         //   getmessages();
@@ -670,12 +687,12 @@ class chatScreenState extends State<chatScreen>{
       userID = map['data']['id'];
     });
   }
-  void getmessages() async {
+  void getmessages(id) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String token = sharedPrefs.getString('token');
     //(sharedPrefs.getString('UserType') == 'مشتري')?"https://amer.jit.sa/api/user/rooms/roomMessages/1":
     http.Response response = await http.get(
-      (sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/rooms/roomMessages/${widget.selectedID}':"https://amer.jit.sa/api/vendor/rooms/roomMessages/${widget.selectedID}",
+      (sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/rooms/roomMessages/$id':"https://amer.jit.sa/api/vendor/rooms/roomMessages/$id",
       headers: {
         HttpHeaders.authorizationHeader: "$token",
         "Accept": "application/json"

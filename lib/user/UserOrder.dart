@@ -1271,7 +1271,7 @@ class UserOrderStat extends State<UserOrder> {
             textColor: Colors.white,
             fontSize: 16.0
         );
-
+        Navigator.pushReplacementNamed(context, "Home_user");
       }else{
         Navigator.pop(context);
         print(Res.toString());

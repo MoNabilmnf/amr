@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:amr/Global.dart';
 import 'package:amr/Screens/Home.dart';
 import 'package:amr/user/Home_user.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:masked_text_input_formatter/masked_text_input_formatter.dart';
@@ -23,13 +26,24 @@ class CodeState extends State<Code>{
   final TextEditingController _controller2 = new TextEditingController();
   final TextEditingController _pinPutController = TextEditingController();
   final FocusNode _pinPutFocusNode = FocusNode();
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   int groub = 0;
   String no1 ='';
   String no2 ='';
   String no3 ='';
   String no4 ='';
   String value;
+  String FCMToken = '';
   //Color color1 = colorFromHex("f6755f");
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _firebaseMessaging.getToken().then((token){
+      print(token);
+      FCMToken = token;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     CheckInternet(context);
@@ -37,7 +51,7 @@ class CodeState extends State<Code>{
     // TODO: implement build
     return Scaffold(
       body: Directionality(
-        textDirection: TextDirection.rtl,
+        textDirection: TextDirection.ltr,
         child:Container(padding:EdgeInsets.all(8),height: double.infinity,
             width: double.infinity,decoration: BoxDecoration(
           image: DecorationImage(
@@ -62,19 +76,19 @@ class CodeState extends State<Code>{
               fontWeight: FontWeight.bold,
             ),
           ),
-          GestureDetector(onTap: (){
-
-          },child:Text(
-            'لم تستلم رمز ؟',
-            style: TextStyle(
-              color: Colors.white70,
-              fontFamily: 'jana',
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
+        //   GestureDetector(onTap: (){
+        //
+        //   },child:Text(
+        //     'لم تستلم رمز ؟',
+        //     style: TextStyle(
+        //       color: Colors.white70,
+        //       fontFamily: 'jana',
+        //       fontSize: 14,
+        //       fontWeight: FontWeight.bold,
+        //       decoration: TextDecoration.underline,
+        //     ),
+        //   ),
+        // ),
 
           SizedBox(height: 20,),
 
@@ -121,6 +135,7 @@ class CodeState extends State<Code>{
               CheckInternet(context);
               String Res = await AddCode(_pinPutController.text);
               if(Res == 'success'){
+                await AddFCM();
                 if(user_type == 'مشتري'){
                   Navigator.pushReplacement(
                       context,
@@ -197,6 +212,21 @@ class CodeState extends State<Code>{
       sharedPrefs.setString('token', '${responsebody['data']['token']}');
       sharedPrefs.setString('UserId', '${responsebody['data']['id']}');
       sharedPrefs.setString('UserType', '$user_type');
+      return 'success';
+    }else{
+      return responsebody['data']['message'].toString();
+    }
+  }
+  AddFCM() async {
+    Map<String, dynamic> d ={
+      "token":"$FCMToken"
+    };
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.post((sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/set-fcm-token':'https://amer.jit.sa/api/vendor/set-fcm-token',body: json.encode(d),headers: {HttpHeaders.authorizationHeader: "$token", "Accept":"application/json",'Content-type': 'application/json',});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
       return 'success';
     }else{
       return responsebody['data']['message'].toString();

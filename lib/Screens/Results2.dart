@@ -1,5 +1,6 @@
 import 'package:amr/Global.dart';
 import 'package:amr/Screens/discover.dart';
+import 'package:amr/user/discover_userSearch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,15 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../BNBCustompain.dart';
 
-class Results extends StatefulWidget{
+class Results2 extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return ResultState();
+    return Results2State();
   }
 
 }
-class ResultState extends State<Results>{
+class Results2State extends State<Results2>{
   List<String> Cats = new List();
   List<String> City = new List();
   List S = [];
@@ -137,7 +138,100 @@ class ResultState extends State<Results>{
               ),
             ),),
           ],),
+          Row(children: [
+            Text(
+              'عرض النتائج حسب',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'jana',
+                fontSize: 14,
+              ),
+            ),
+          ],),
+          Row(children: [
+            Theme(
+              data: Theme.of(context).copyWith(
+                unselectedWidgetColor: Colors.white38,
+                //disabledColor: Colors.blue
+              ),
+              child:Radio(
+                  activeColor: Colors.white,
+                  value: 88,
+                  hoverColor: colorFromHex("f6755f"),
+                  groupValue: groub,
+                  onChanged: (T) {
+                      print(T);
+                    setState(() {
+                      groub = T;
 
+                    });
+                  }),),
+            Text(
+              'اليوم',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'jana',
+                fontSize: 14,
+              ),
+            ),
+
+          ],),
+          Row(children: [
+            Theme(
+              data: Theme.of(context).copyWith(
+                unselectedWidgetColor: Colors.white38,
+                //disabledColor: Colors.blue
+              ),
+              child:Radio(
+                  activeColor: Colors.white,
+                  value: 77,
+                  hoverColor: colorFromHex("f6755f"),
+                  groupValue: groub,
+                  onChanged: (T) {
+                      print(T);
+                    setState(() {
+                      groub = T;
+
+                    });
+                  }),),
+            Text(
+              'الأحداث',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'jana',
+                fontSize: 14,
+              ),
+            ),
+          ],),
+          Row(children: [
+            Theme(
+              data: Theme.of(context).copyWith(
+                unselectedWidgetColor: Colors.white38,
+                //disabledColor: Colors.blue
+              ),
+              child:Radio(
+                  activeColor: Colors.white,
+                  value: 66,
+                  hoverColor: colorFromHex("f6755f"),
+                  groupValue: groub,
+                  onChanged: (T) {
+                      print(T);
+                    setState(() {
+                      groub = T;
+
+                    });
+                  }),),
+            Text(
+              'الأقدم',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'jana',
+                fontSize: 14,
+              ),
+            ),
+
+
+          ],),
           Row(children: [
             Text(
               'التصنيفات',
@@ -160,15 +254,15 @@ class ResultState extends State<Results>{
               itemCount: S.length,
               itemBuilder: (BuildContext context, int index){
                 return new InkWell(
-                  onTap: (){
-                    setState(() {
-                      CatId = S[index]['id'];
-                    });
-                  },
-                  child: Center(child: Container(
+                    onTap: (){
+                      setState(() {
+                        CatId = S[index]['id'];
+                      });
+                    },
+                    child: Center(child: Container(
                       margin: EdgeInsets.only(left: 10),
                       decoration: BoxDecoration(
-                          border: Border.all(color: (CatId == S[index]['id'])?Colors.white:colorFromHex("f6755f")),
+                        border: Border.all(color: (CatId == S[index]['id'])?Colors.white:colorFromHex("f6755f")),
                         color: Colors.white38,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(10),
@@ -221,38 +315,38 @@ class ResultState extends State<Results>{
               itemCount: C.length,
               itemBuilder: (BuildContext context, int index){
                 return new InkWell(
-                  onTap: (){
-                        setState(() {
-                          CityId = C[index]['id'];
-                        });
-                  },
-                  child:  Center(child: Container(
-                        width: 60,
-                        margin: EdgeInsets.only(left: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: (CityId ==C[index]['id'])?Colors.white:colorFromHex("f6755f")),
-                          color: Colors.white38,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                              bottomLeft: Radius.circular(10),
-                              bottomRight: Radius.circular(10)
-                          ),
+                    onTap: (){
+                      setState(() {
+                        CityId = C[index]['id'];
+                      });
+                    },
+                    child:  Center(child: Container(
+                      width: 60,
+                      margin: EdgeInsets.only(left: 10),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: (CityId ==C[index]['id'])?Colors.white:colorFromHex("f6755f")),
+                        color: Colors.white38,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                            bottomRight: Radius.circular(10)
                         ),
-                        child: Column(mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '${C[index]['title']}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'jana',
-                                fontSize: 14,
-                              ),
+                      ),
+                      child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Text(
+                            '${C[index]['title']}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'jana',
+                              fontSize: 14,
                             ),
+                          ),
 
-                          ],
-                        ),
-                      ),)
+                        ],
+                      ),
+                    ),)
                 );
               },
             ),
@@ -279,40 +373,44 @@ class ResultState extends State<Results>{
             onTap: (){
               print("Container clicked");
               setState(() {
-                FCatID =(CatId == 0)?'': CatId.toString();
-                FCityID =(CityId == 0)?'': CityId.toString();
-                FpriceTo = _controller2.text;
-                FpriceFrom = _controller.text;
+                F2CatID =(CatId == 0)?'': CatId.toString();
+                F2CityID =(CityId == 0)?'': CityId.toString();
+                F2priceTo = _controller2.text;
+                F2priceFrom = _controller.text;
+                F2sort_by = (groub==88)?"today":(groub==77)?"newest":(groub==66)?"oldest":"";
               });
               Navigator.pop(context);
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => discover(),
+                    builder: (context) => discover_userSearch(),
                   ));
               //Navigator.pushNamed(context, "Home");
             },
             child:Container(
-            height: size.height*0.07,
-            decoration: BoxDecoration(
-              color: Colors.white38,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10)
+              height: size.height*0.07,
+              decoration: BoxDecoration(
+                color: Colors.white38,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10)
+                ),
               ),
-            ),
-            child: Center(child: Text(
-              'تطبيق التغيرات',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: 'jana',
-                fontSize: 14,
-              ),
+              child: Center(child: Text(
+                'تطبيق التغيرات',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'jana',
+                  fontSize: 14,
+                ),
+              ),),
             ),),
-          ),),
-      ],),),),),
+
+        ],),
+        ),),),
+
     );
   }
   void getCat() async {

@@ -75,8 +75,8 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MessagingWidget(),
-      //home: Splash(),
+      //home: chatScreen(),
+      home: Splash(),
         routes: <String, WidgetBuilder>{
           "notification": (BuildContext context) => new notification(),
           "Home": (BuildContext context) => new HomeAS(),
@@ -102,6 +102,8 @@ class MyApp extends StatelessWidget {
           "Login": (BuildContext context) => new Login(),
           "ForgotPass_user": (BuildContext context) => new ForgotPass(),
           "user_type": (BuildContext context) => new user_type(),
+          "Home_user": (BuildContext context) => new Home_user(),
+          "MessagingWidget": (BuildContext context) => new MessagingWidget(),
           "Code": (BuildContext context) => new Code(),
         }
     );

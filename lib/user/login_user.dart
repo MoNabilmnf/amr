@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:ui';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -32,6 +34,17 @@ class Login_userState extends State<Login_user> {
   final TextEditingController _controller4 = new TextEditingController();
   Color color1 = colorFromHex("f6755f");
   int password=0,phone=0;
+  String FCMToken = '';
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _firebaseMessaging.getToken().then((token){
+      print(token);
+      FCMToken = token;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -118,7 +131,7 @@ class Login_userState extends State<Login_user> {
                         enabledBorder: InputBorder.none,
                         errorBorder: InputBorder.none,
                         disabledBorder: InputBorder.none,
-                        hintText: '+201003578367',
+                        hintText: '01003578367',
                         hintStyle: TextStyle(color: Colors.black),
                       ),
                     ),width: MediaQuery.of(context).size.width * 0.8
@@ -235,6 +248,7 @@ class Login_userState extends State<Login_user> {
                       sharedPrefs.setString('token', '${m['token']}');
                       sharedPrefs.setString('UserType', 'مشتري');
                       print(sharedPrefs.getString('UserType'));
+                      await AddFCM();
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -252,6 +266,7 @@ class Login_userState extends State<Login_user> {
                       sharedPrefs.setString('token', '${m['token']}');
                       sharedPrefs.setString('UserType', 'بائع');
                       print(sharedPrefs.getString('UserType'));
+                      await AddFCM();
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
@@ -371,6 +386,21 @@ class Login_userState extends State<Login_user> {
 
     );
 
+  }
+  AddFCM() async {
+    Map<String, dynamic> d ={
+      "token":"$FCMToken"
+    };
+    final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+    String token = sharedPrefs.getString('token');
+    http.Response response = await http.post((sharedPrefs.getString('UserType') == 'مشتري')?'https://amer.jit.sa/api/user/set-fcm-token':'https://amer.jit.sa/api/vendor/set-fcm-token',body: json.encode(d),headers: {HttpHeaders.authorizationHeader: "$token", "Accept":"application/json",'Content-type': 'application/json',});
+    print(response.body.toString());
+    var responsebody = json.decode(response.body);
+    if(response.statusCode == 200){
+      return 'success';
+    }else{
+      return responsebody['data']['message'].toString();
+    }
   }
 
 }

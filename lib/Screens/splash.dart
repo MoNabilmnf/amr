@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:amr/Screens/Home.dart';
 import 'package:amr/user/Home_user.dart';
 import 'package:amr/user/Registration_user.dart';
+import 'package:amr/user/model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,9 +17,11 @@ class Splash extends StatefulWidget {
 
 class SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
+  final List<Message> messages = [];
   @override
   initState() {
     super.initState();
+
     splash();
   }
 

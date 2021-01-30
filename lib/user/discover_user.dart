@@ -19,6 +19,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'DiscoverDitails.dart';
+import 'UserOrder.dart';
+import 'discover_userRealySearch.dart';
+import 'discover_userSearch.dart';
+import 'login_user.dart';
 
 class discover_user extends StatefulWidget {
   @override
@@ -103,6 +107,7 @@ class discover_userState extends State<discover_user> {
     "https://dubarter.s3-eu-west-1.amazonaws.com/2018/06/large-1993033583095106736.jpg",
     "https://dubarter.s3-eu-west-1.amazonaws.com/2018/06/large-1577744743291838940.jpg"
   ];
+
   int main = 2;
   bool is_favorite = false;
   List groupss = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -505,7 +510,7 @@ class discover_userState extends State<discover_user> {
         builder: (builder) {
           return FractionallySizedBox(
             heightFactor: 0.90,
-            child: BigListViewWidgetfloat(),
+            child: UserOrder(),
           );
         });
   }
@@ -1483,19 +1488,19 @@ class discover_userState extends State<discover_user> {
                                         ),
                                       ),
                                       Spacer(),
-                                      Container(
-                                        width: 25.0,
-                                        height: 25.0,
-                                        decoration: BoxDecoration(
-                                          color: color1,
-                                          // borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                                "https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
+                                      // Container(
+                                      //   width: 25.0,
+                                      //   height: 25.0,
+                                      //   decoration: BoxDecoration(
+                                      //     color: color1,
+                                      //     // borderRadius: BorderRadius.all(Radius.circular(100.0)),
+                                      //     image: DecorationImage(
+                                      //       image: NetworkImage(
+                                      //           "https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
+                                      //       fit: BoxFit.cover,
+                                      //     ),
+                                      //   ),
+                                      // ),
                                       SizedBox(
                                         width: 5,
                                       ),
@@ -1528,9 +1533,15 @@ class discover_userState extends State<discover_user> {
                                   flex: 6,
                                   child: new GestureDetector(
                                     onTap: () {
-                                      showSearch(
-                                          context: context,
-                                          delegate: DataSearch());
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => discover_userRealySearch(),
+                                          ));
+                                      //print("sads");
+                                      // showSearch(
+                                      //     context: context,
+                                      //     delegate: DataSearch());
                                     },
                                     child: Container(
                                       padding: EdgeInsets.all(8),
@@ -1562,32 +1573,32 @@ class discover_userState extends State<discover_user> {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Expanded(
-                                  flex: 1,
-                                  child: Container(
-                                    height: size.height * 0.08,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(10),
-                                          topRight: Radius.circular(10),
-                                          bottomLeft: Radius.circular(10),
-                                          bottomRight: Radius.circular(10)),
-                                    ),
-                                    child: IconButton(
-                                      icon: Icon(
-                                        Icons.tune,
-                                        color: Colors.grey,
-                                      ),
-                                      onPressed: () {
-                                        //Navigator.pushNamed(context, "Results");
-                                      },
-                                    ),
-                                  ),
-                                ),
+                                // SizedBox(
+                                //   width: 5,
+                                // ),
+                                // Expanded(
+                                //   flex: 1,
+                                //   child: Container(
+                                //     height: size.height * 0.08,
+                                //     decoration: BoxDecoration(
+                                //       color: Colors.white,
+                                //       borderRadius: BorderRadius.only(
+                                //           topLeft: Radius.circular(10),
+                                //           topRight: Radius.circular(10),
+                                //           bottomLeft: Radius.circular(10),
+                                //           bottomRight: Radius.circular(10)),
+                                //     ),
+                                //     child: IconButton(
+                                //       icon: Icon(
+                                //         Icons.tune,
+                                //         color: Colors.grey,
+                                //       ),
+                                //       onPressed: () {
+                                //         //Navigator.pushNamed(context, "Results");
+                                //       },
+                                //     ),
+                                //   ),
+                                // ),
                               ],
                             ),
                           ),
@@ -1761,10 +1772,13 @@ class discover_userState extends State<discover_user> {
                                   //   children: [
                                       Text(
                                         featured_vendors[index]['username'],
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        textAlign: TextAlign.center,
                                         style: TextStyle(
                                             color: Colors.black,
                                             fontFamily: 'jana',
-                                            fontSize: 14,
+                                            fontSize: 12,
                                             fontWeight: FontWeight.bold),
                                       ),
                                   //   ],
@@ -1829,7 +1843,7 @@ class discover_userState extends State<discover_user> {
                       ),
                     ),
                     (featured_offers.isEmpty)?Container():Container(
-                      //margin:EdgeInsets.only(left: 20,right: 20),
+                      margin:EdgeInsets.only(left: 20,right: 20),
                       height: 180.0,
                       child:
                       ListView.builder(
@@ -1883,14 +1897,15 @@ class discover_userState extends State<discover_user> {
                                         alignment: Alignment.topLeft,
                                         child: GestureDetector(
                                             onTap: () async {
-                                              print("hghgghghgh");
-                                              String Res = await addFavorite(featured_offers[index]['id']);
-                                              if(Res != "success"){onBackPress(context,Res);}
                                               setState(() {
                                                 (fa[index] == 1)
                                                     ? fa[index] = 0
                                                     : fa[index] = 1;
                                               });
+                                              print("hghgghghgh");
+                                              String Res = await addFavorite(featured_offers[index]['id']);
+                                              if(Res != "success"){onBackPress(context,Res);}
+
 
                                             },
                                             child: Container(
@@ -1925,7 +1940,7 @@ class discover_userState extends State<discover_user> {
                                                 fontWeight: FontWeight.bold),
                                           ),
                                           Text(
-                                            featured_offers[index]['price'],
+                                            featured_offers[index]['price'].toString(),
                                             style: TextStyle(
                                                 color: color1,
                                                 fontFamily: 'jana',
@@ -1946,7 +1961,7 @@ class discover_userState extends State<discover_user> {
                     (categories_with_offers.isEmpty)?Container(): ListView.builder(
                         shrinkWrap: true,
                         //scrollDirection: Axis.horizontal,
-                        //controller: _scrollController,
+                        controller: _scrollController,
                         itemCount: categories_with_offers.length,
                         itemBuilder: (BuildContext context, int index) {
 
@@ -2000,7 +2015,7 @@ class discover_userState extends State<discover_user> {
                               ),
                             ),
                             (titlessss == null)?Container():Container(
-                              //margin:EdgeInsets.only(left: 20,right: 20),
+                              margin:EdgeInsets.only(left: 20,right: 20),
                               height: 180.0,
                               child: ListView.builder(
                                 shrinkWrap: true,
@@ -2012,7 +2027,7 @@ class discover_userState extends State<discover_user> {
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => details_price(id:featured_offers[index]['id'] ,),
+                                            builder: (context) => details_price(id:titlessss[i]['id'] ,),
                                           ));
                                     },
                                     child: Container(
@@ -2059,7 +2074,7 @@ class discover_userState extends State<discover_user> {
                                                         fontWeight: FontWeight.bold),
                                                   ),
                                                   Text(
-                                                    titlessss[i]['price'],
+                                                    titlessss[i]['price'].toString(),
                                                     style: TextStyle(
                                                         color: color1,
                                                         fontFamily: 'jana',
@@ -2206,14 +2221,25 @@ class discover_userState extends State<discover_user> {
         "Accept": "application/json"
       },
     );
-    Map map = json.decode(response.body);
-    print("user usr $map");
-    print(token);
-    setState(() {
-      // Profile = map['data'];
-      username = map['data']['username'];
-      imageProfile = map['data']['image'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print("user usr $map");
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        username = map['data']['username'];
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
   }
   void getFilter(ID) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
@@ -2225,15 +2251,26 @@ class discover_userState extends State<discover_user> {
         "Accept": "application/json"
       },
     );
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      // Profile = map['data'];
-      featured_vendors = map['data']['featured_vendors'];
-      featured_offers = map['data']['featured_offers'];
-      categories_with_offers = map['data']['categories_with_offers'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        featured_vendors = map['data']['featured_vendors'];
+        featured_offers = map['data']['featured_offers'];
+        categories_with_offers = map['data']['categories_with_offers'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
   }
   void getIndex() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
@@ -2245,29 +2282,50 @@ class discover_userState extends State<discover_user> {
         "Accept": "application/json"
       },
     );
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      // Profile = map['data'];
-      categories = map['data']['categories'];
-      featured_vendors = map['data']['featured_vendors'];
-      featured_offers = map['data']['featured_offers'];
-      categories_with_offers = map['data']['categories_with_offers'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        categories = map['data']['categories'];
+        featured_vendors = map['data']['featured_vendors'];
+        featured_offers = map['data']['featured_offers'];
+        categories_with_offers = map['data']['categories_with_offers'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
   }
   addFavorite(order_id) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
     var body = {
-      "order_id":"$order_id"
+      "offer_id":"$order_id"
     };
-    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    http.Response response = await http.post("https://amer.jit.sa/api/user/offer/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
     print(response.body.toString());
     var responsebody = json.decode(response.body);
     if(response.statusCode == 200){
       return 'success';
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }else{
+      onBackPress(context,'${responsebody['data']['message']}');
+      print(response.statusCode.toString());
       return '${responsebody['data']['message']}';
     }
   }
@@ -2281,14 +2339,25 @@ class discover_userState extends State<discover_user> {
         "Accept": "application/json"
       },
     );
-    Map map = json.decode(response.body);
-    print(map);
-    print(token);
-    setState(() {
-      // Profile = map['data'];
-      more = map['data']['featured_vendors'];
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print(map);
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        more = map['data']['featured_vendors'];
 
-    });
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
    // onButtonPressed(context);
   }
 }

@@ -227,7 +227,7 @@ class EditOrderState extends State<EditOrder>{
             //   ],),
             //
             // ),
-            (SubCat.isEmpty)?Container():Container(width:size.width*0.40,height:size.height*0.12 ,padding: EdgeInsets.only(left: 8,right:8 ),
+            (SubCat.isEmpty)?Container():Container(width:size.width*0.40,padding: EdgeInsets.only(left: 8,right:8 ),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
                 borderRadius: BorderRadius.only(
@@ -460,9 +460,7 @@ class EditOrderState extends State<EditOrder>{
                 onBackPress(context,"أضف وصفا");
               }else if(SubCatId == null){
                 onBackPress(context,"أختر فئة فرعيه");
-              }else if(imagesNew.isEmpty){
-                onBackPress(context,"أضف صور");
-              }else{
+              }else {
                 Navigator.push(
                     context,
                     MaterialPageRoute(

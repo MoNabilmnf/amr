@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../BNBCustompain.dart';
+import 'discover_user.dart';
 
 class deliverd_details extends StatefulWidget{
   deliverd_details({this.id,this.title,this.price});
@@ -23,7 +24,8 @@ class deliverd_details extends StatefulWidget{
 class deliverd_detailsState extends State<deliverd_details>{
   final TextEditingController _controller = new TextEditingController();
   final TextEditingController _controller2 = new TextEditingController();
-
+  DateTime date = DateTime.now();
+  //String dateFormat = DateFormat('dd-MM-yyyy hh:mm').format(date);
   int groub = 0;
   Color color1 = colorFromHex("f6755f");
   @override
@@ -92,7 +94,7 @@ class deliverd_detailsState extends State<deliverd_details>{
                       fontWeight: FontWeight.bold,
                       fontFamily: 'jana'
                   )),
-              Text("20-5-20",
+              Text("${date.day}-${date.month}-${date.year}",
                   style: new TextStyle(
                       fontSize: size.width*0.025,
                       color:  Colors.grey,
@@ -181,18 +183,8 @@ class deliverd_detailsState extends State<deliverd_details>{
                 child: GestureDetector(
                   onTap: () async {
                     print("Container clicked");
-                    String Res = await  AddAPI();
-                    if(Res == "success"){
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Home_user(),
-                          ));
-                    }else{
-                      onBackPress(context,Res);
-                    }
+                    _onLoadingLogin(context);
+
 
                     //Navigator.pushNamed(context, "NewOrder2");
                   },
@@ -232,6 +224,36 @@ class deliverd_detailsState extends State<deliverd_details>{
 
       ],),),),),
     );
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+      String Res = await  AddAPI();
+      if(Res == "success"){
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => discover_user(),
+            ));
+      }else{
+        Navigator.pop(context);
+        onBackPress(context,Res);
+      }
+    });
+
   }
   AddAPI() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();

@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:amr/APIs/Api.dart';
 import 'package:amr/Global.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:amr/user/discover_user.dart';
 import 'package:amr/user/messages_user.dart';
@@ -1004,33 +1005,8 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
                               onBackPress(context, "الميزانية المتاحه فارغه");
                             } else {
                                CheckInternet(context);
-                               if(imagesNew.isEmpty){
-                                 print(_controller1.text);
-                                 String Res = await EditOrder22(widget.id,context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
-                                 if(Res == 'Success'){
-                                   Navigator.pop(context);
-                                   Navigator.pushReplacement(
-                                       context,
-                                       MaterialPageRoute(
-                                         builder: (context) => order_details(id: widget.id,),
-                                       ));
-                                 }else{
-                                   onBackPress(context, "$Res");
-                                   //print(Res.toString());
-                                 }
-                               }else{
-                                 String Res = await EditOrder(widget.id,imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
-                                 if(Res == 'Success'){
-                                   Navigator.pop(context);
-                                   Navigator.pushReplacement(
-                                       context,
-                                       MaterialPageRoute(
-                                         builder: (context) => order_details(id: widget.id,),
-                                       ));
-                                 }else{
-                                   print(Res.toString());
-                                 }
-                            }
+                               _onLoadingLogin(context);
+
 
                             }
                             //print("Container clicked");
@@ -1164,6 +1140,50 @@ class UserOrderupdateStat extends State<UserOrderupdate> {
       int postion = SubCatIds.indexOf(widget.SubCatId);
       print("postion is $postion");
       fa[postion] = 1;
+    });
+
+  }
+  void _onLoadingLogin(context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        );
+      },
+    );
+    new Future.delayed(new Duration(seconds: 1), () async {
+      if(imagesNew.isEmpty){
+        print(_controller1.text);
+        String Res = await EditOrder22(widget.id,context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
+        if(Res == 'Success'){
+          Navigator.pop(context);
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => order_details(id: widget.id,),
+              ));
+        }else{
+          onBackPress(context, "$Res");
+          //print(Res.toString());
+        }
+      }else{
+        String Res = await EditOrder(widget.id,imagesNew, context,CatID,SubCatID,_controller3.text,_controller4.text,CityId,DicId,_controller1.text,_controller2.text);
+        if(Res == 'Success'){
+          Navigator.pop(context);
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => order_details(id: widget.id,),
+              ));
+        }else{
+          print(Res.toString());
+        }
+      }
     });
 
   }

@@ -1,3 +1,6 @@
+import 'package:amr/Screens/notification.dart';
+import 'package:amr/user/login_user.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_stack/image_stack.dart';
@@ -31,12 +34,44 @@ class HomeASState extends State<HomeAS>{
   String username = '';
   int main = 1;
   List<String> images = ["https://www.hklaw.com/-/media/images/professionals/p/parsons-kenneth-w/newphoto/parsons-kenneth-w.jpg", "https://www.caa.com/sites/default/files/styles/headshot_500x500/public/speaker-headshots/ParsonsJ_headshot_web.jpg?itok=iu-I0aZJ"];
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getIndex();
     getUserData();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        //final notification = message['notification'];
+
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+       // Navigator.pushNamed(context, "chatScreen");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => notification(),
+          ),
+        );
+       // final notification = message['data'];
+
+      },
+      onResume: (Map<String, dynamic> message) async {
+        //Navigator.pushNamed(context, "chatScreen");
+        print("onResume: $message");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => notification(),
+          ),
+        );
+      },
+    );
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true));
   }
   @override
   Widget build(BuildContext context) {
@@ -87,18 +122,18 @@ class HomeASState extends State<HomeAS>{
 
 
 
-              Container(
-                width: 25.0,
-                height: 25.0,
-                decoration: BoxDecoration(
-                  color: color1,
-                  // borderRadius: BorderRadius.all(Radius.circular(100.0)),
-                  image: DecorationImage(
-                    image: NetworkImage("https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+              // Container(
+              //   width: 25.0,
+              //   height: 25.0,
+              //   decoration: BoxDecoration(
+              //     color: color1,
+              //     // borderRadius: BorderRadius.all(Radius.circular(100.0)),
+              //     image: DecorationImage(
+              //       image: NetworkImage("https://www.aalforum.eu/wp-content/uploads/2016/04/profile-placeholder.png"),
+              //       fit: BoxFit.cover,
+              //     ),
+              //   ),
+              // ),
               SizedBox(width: 5,),
               IconButton(icon: Icon(Icons.notifications,color: color4,), onPressed: (){
                 Navigator.pushNamed(context, "notification");
@@ -109,7 +144,7 @@ class HomeASState extends State<HomeAS>{
               Text((username.isNotEmpty)?"أهلا بعودتك $username":"أهلا بعودتك ",style: TextStyle(color: Colors.white,fontFamily: 'Jana'),),
             ],),
             Row(mainAxisAlignment:MainAxisAlignment.start,children: [
-              Text("جميع عروضنا هنا",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white,fontFamily: 'Jana'),),
+              Text("جميع عروضك هنا",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20,color: Colors.white,fontFamily: 'Jana'),),
             ],)
 
 
@@ -155,9 +190,9 @@ class HomeASState extends State<HomeAS>{
                 //     ),
                 //   ),
                 // ),
-                Text("لا يوجد لديك طلبات", style: TextStyle(color: Colors.black,fontFamily: 'jana',
+                Text("لا يوجد لديك عروض", style: TextStyle(color: Colors.black,fontFamily: 'jana',
                     fontSize: 28,fontWeight: FontWeight.bold),),
-                Text("إرسل طلبك الاول للحصول على عرض", style: TextStyle(color: Colors.grey,fontFamily: 'jana',
+                Text("إرسل عرضك الاول", style: TextStyle(color: Colors.grey,fontFamily: 'jana',
                     fontSize: 14,fontWeight: FontWeight.bold),),
               ],),
             ):
@@ -587,14 +622,25 @@ class HomeASState extends State<HomeAS>{
         "Accept": "application/json"
       },
     );
-    Map map = json.decode(response.body);
-    print("user usr $map");
-    print(token);
-    setState(() {
-      // Profile = map['data'];
-      username = map['data']['username'];
-      imageProfile = map['data']['image'];
-    });
+    if(response.statusCode == 200){
+      Map map = json.decode(response.body);
+      print("user usr $map");
+      print(token);
+      setState(() {
+        // Profile = map['data'];
+        username = map['data']['username'];
+        imageProfile = map['data']['image'];
+      });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
+    }
+
   }
   void getIndex() async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
@@ -608,6 +654,14 @@ class HomeASState extends State<HomeAS>{
         C = map['data']['offers'];
         //City = map['data']['cities'];
       });
+    }else if(response.statusCode == 401){
+      sharedPrefs.remove('token');
+      sharedPrefs.remove('UserType');
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Login_user(),
+          ));
     }else{
       C = [];
     }

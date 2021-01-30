@@ -1,3 +1,4 @@
+import 'package:amr/user/details_price.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -31,12 +32,38 @@ class DiscoverDitails extends StatefulWidget {
 
 class DiscoverDitailsStat extends State<DiscoverDitails> {
   List more = [];
+  ScrollController _scrollController = ScrollController();
+  String nextpage;
   List fa = [0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getall();
+    _scrollController.addListener(() async {
+      final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
+      String token = sharedPrefs.getString('token');
+      if(_scrollController.position.pixels == _scrollController.position.maxScrollExtent){
+
+        if(nextpage != null){
+          http.Response response = await http.get(nextpage,headers: {HttpHeaders.authorizationHeader:"$token","Accept":"application/json"},);
+          Map map = json.decode(response.body);
+          List s = map['data']['offers'];
+          setState(() {
+            nextpage = map['data']['nextPageUrl'];
+          });
+
+          for(int i = 0 ; i < s.length ; i++){
+            more.add(s[i]);
+          }
+          // setState(() {
+          //   nextpage = map['data']['data']['next_page_url'];
+          // });
+        }
+        print("$nextpage");
+        print("sdsaddsadsdasadsadad");
+      }
+    });
     //getCat();
   }
   Color color1 = colorFromHex("f6755f");
@@ -82,6 +109,7 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
                         ),
                         new Expanded(
                             child: GridView.count(
+                              controller: _scrollController,
                               crossAxisCount: 2,
                               children: List.generate(more.length, (index) {
                                 return GestureDetector(
@@ -141,13 +169,16 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
                                                 child: GestureDetector(
                                                     onTap: () async {
                                                       print("hghgghghgh");
+                                                      // setState(() {
+                                                      //   (fa[index] == 1)
+                                                      //       ? fa[index] = 0
+                                                      //       : fa[index] = 1;
+                                                      // });
                                                       String Res = await addFavorite(more[index]['id']);
-                                                      if(Res != "success"){onBackPress(context,Res);}
-                                                      setState(() {
-                                                        (fa[index] == 1)
-                                                            ? fa[index] = 0
-                                                            : fa[index] = 1;
-                                                      });
+                                                      if(Res != "success"){onBackPress(context,Res);}else{
+                                                        getall();
+                                                      }
+
 
                                                     },
                                                     child: Container(
@@ -168,7 +199,13 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
                                             ],
                                           ),
                                         )),
-                                    onTap: () {});
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => details_price(id:more[index]['id'] ,),
+                                          ));
+                                    });
                               }),
                             )),
                       ],
@@ -190,27 +227,18 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
     print(map);
     setState(() {
       more = map['data']['${widget.type}'];
+      nextpage = map['data']['nextPageUrl'];
     });
   }
 
-  void getCat() async {
-    http.Response response = await http.get(
-      'https://amer.jit.sa/api/categories',
-      headers: {"Accept": "application/json"},
-    );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
 
-    });
-  }
   addFavorite(order_id) async {
     final SharedPreferences sharedPrefs = await SharedPreferences.getInstance();
     String T = sharedPrefs.getString('token');
     var body = {
-      "order_id":"$order_id"
+      "offer_id":"$order_id"
     };
-    http.Response response = await http.post("https://amer.jit.sa/api/user/order/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
+    http.Response response = await http.post("https://amer.jit.sa/api/user/offer/favorite",body: body,headers: {HttpHeaders.authorizationHeader:  T, "Accept":"application/json"});
     print(response.body.toString());
     var responsebody = json.decode(response.body);
     if(response.statusCode == 200){
@@ -219,19 +247,7 @@ class DiscoverDitailsStat extends State<DiscoverDitails> {
       return '${responsebody['data']['message']}';
     }
   }
-  void getDic(id) async {
-    http.Response response = await http.get(
-      'https://amer.jit.sa/api/cities/$id',
-      headers: {"Accept": "application/json"},
-    );
-    Map map = json.decode(response.body);
-    print(map);
-    setState(() {
 
-    });
-
-    //onButtonPressedfloat(context);
-  }
 
   void getSubCat(id) async {
     http.Response response = await http.get(
